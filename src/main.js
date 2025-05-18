@@ -11,12 +11,10 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     }
   })
-
-  window.loadFile('index.html')
-
+  window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 }
 
 
