@@ -1,5 +1,6 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const { WebpackPlugin } = require('@electron-forge/plugin-webpack');
 
 module.exports = {
   packagerConfig: {
@@ -40,6 +41,20 @@ module.exports = {
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    }),
+    new WebpackPlugin({
+      mainConfig: './webpack.main.config.js',
+      renderer: {
+        config: './webpack.renderer.config.js',
+        entryPoints: [
+          {
+            name: 'main_window',
+            html: './src/renderer/index.html',
+            js: './src/renderer/index.jsx',   // we’ll create this next
+            preload: { js: './src/preload.js' },
+          },
+        ],
+      },
     }),
   ],
 };
