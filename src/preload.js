@@ -5,7 +5,11 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld(
   'api', {
     selectDirectory: () => ipcRenderer.invoke('select-directory'),
-    createDirectory: (path, name) => ipcRenderer.invoke('create-directory', path, name)
+    createDirectory: (path, name) => ipcRenderer.invoke('create-directory', path, name),
+    saveFile: (folder, filename, content) => ipcRenderer.invoke('save-file', folder, filename, content),
+    listEntries: (folder) => ipcRenderer.invoke('list-entries', folder),
+    getConfig: () => ipcRenderer.invoke('get-config'),
+    updateConfig: (updates) => ipcRenderer.invoke('update-config', updates)
   }
 )
 

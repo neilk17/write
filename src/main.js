@@ -1,6 +1,8 @@
 const electron = require('electron')
 const { app, BrowserWindow, dialog, ipcMain } = electron
 const path = require('path')
+const fs = require('fs').promises
+const { getConfig, updateConfig } = require('./utils/config')
 
 function createWindow() {
   // Create the browser window.
@@ -20,15 +22,36 @@ function createWindow() {
 
 // Handle directory selection and creation
 if (electron.ipcMain) {
+  electron.ipcMain.handle('get-config', async () => {
+    return getConfig();
+  });
+
+  electron.ipcMain.handle('update-config', async (event, updates) => {
+    return updateConfig(updates);
+  });
+
   electron.ipcMain.handle('select-directory', async () => {
+    const config = getConfig();
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory']
     })
     if (!result.canceled && result.filePaths.length > 0) {
-      return result.filePaths[0]
+      const selectedPath = result.filePaths[0];
+      await updateConfig({ defaultPath: selectedPath });
+      return selectedPath
     }
     return null
   })
+
+  electron.ipcMain.handle('save-file', async (event, folder, filename, content) => {
+    try {
+      const filePath = path.join(folder, filename);
+      await fs.writeFile(filePath, content, 'utf8');
+      return filePath;
+    } catch (error) {
+      throw new Error(`Failed to save file: ${error.message}`);
+    }
+  });
 
   electron.ipcMain.handle('create-directory', async (event, basePath, folderName) => {
     if (!basePath || !folderName) {
@@ -44,6 +67,31 @@ if (electron.ipcMain) {
       return targetPath
     } catch (error) {
       throw new Error(`Failed to create directory: ${error.message}`)
+    }
+  })
+
+  electron.ipcMain.handle('list-entries', async (event, folder) => {
+    try {
+      const files = await fs.readdir(folder);
+      const entries = [];
+
+      for (const file of files) {
+        if (file.endsWith('.txt')) {
+          const filePath = path.join(folder, file);
+          const content = await fs.readFile(filePath, 'utf8');
+          entries.push({
+            filename: file,
+            content,
+            timestamp: file.split('.')[0] // Remove .txt extension
+          });
+        }
+      }
+
+      // Sort entries by filename (which contains timestamp) in descending order
+      entries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+      return entries;
+    } catch (error) {
+      throw new Error(`Failed to list entries: ${error.message}`);
     }
   })
 }
