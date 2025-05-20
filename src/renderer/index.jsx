@@ -42,19 +42,19 @@ function App() {
     return (
         <>
             {selectedFolder ? (
-                <div className='p-8 mt-6'>
+                <div className='p-8'>
                     <div className='flex justify-end m-6 space-x-4'>
                         {mode === 'write' ? (
                             <button
                                 onClick={() => setMode('read')}
-                                className='px-4 py-2 rounded bg-gray-200'
+                                className='hover:cursor-pointer px-4 py-2 rounded bg-gray-200'
                             >
                                 Read
                             </button>
                         ) : (
                             <button
                                 onClick={() => setMode('write')}
-                                className='px-4 py-2 rounded bg-gray-200'
+                                className='hover:cursor-pointer px-4 py-2 rounded bg-gray-200'
                             >
                                 Write
                             </button>
