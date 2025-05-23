@@ -28,11 +28,17 @@
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.0",
     "style-loader": "^3.3.4",
-    "tailwindcss": "^4.1.7"
+    "tailwindcss": "^4.1.7",
+    "typecript": "^0.0.1-security"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "electron-squirrel-startup": "^1.0.1",
+    "node-loader": "^2.1.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2"
   }
 }
