@@ -46,24 +46,11 @@ function App() {
         <div className="p-8">
           <div className="flex justify-end m-6 space-x-4">
             {mode === "write" ? (
-              <Button
-                onClick={() => setMode("read")}
-                className="hover:cursor-pointer px-4 py-2 rounded bg-gray-200"
-              >
-                Read
-              </Button>
+              <Button onClick={() => setMode("read")}>Read</Button>
             ) : (
-              <Button
-                onClick={() => setMode("write")}
-                className="hover:cursor-pointer px-4 py-2 rounded bg-gray-200"
-              >
-                Write
-              </Button>
+              <Button onClick={() => setMode("write")}>Write</Button>
             )}
-            <Button
-              onClick={handleFolderSelect}
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
+            <Button variant="outline" onClick={handleFolderSelect}>
               Change Folder
             </Button>
           </div>
