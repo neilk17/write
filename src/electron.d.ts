@@ -10,8 +10,6 @@ interface ElectronAPI {
 
 interface FileEntry {
     name: string;
-    isDirectory: boolean;
-    isFile: boolean;
     modifiedTime: string;
 }
 

@@ -9,7 +9,6 @@ function App() {
   const [defaultPath, setDefaultPath] = useState("");
   const [mode, setMode] = useState("write"); // 'write' or 'read'
 
-  console.log("+===>>>>>", selectedFolder);
   useEffect(() => {
     const loadDefaultPath = async () => {
       try {
@@ -43,7 +42,7 @@ function App() {
   return (
     <>
       {selectedFolder ? (
-        <div className="p-8">
+        <>
           <div className="flex justify-end m-6 space-x-4">
             {mode === "write" ? (
               <Button onClick={() => setMode("read")}>Read</Button>
@@ -59,7 +58,7 @@ function App() {
           ) : (
             <JournalEntries selectedFolder={selectedFolder} />
           )}
-        </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center h-screen">
           <div className="mt-8"></div>
@@ -83,10 +82,4 @@ function App() {
 }
 
 const root = createRoot(document.body);
-// root.render(
-//   <>
-//     <h2 className="text-3xl ">Hello from React!</h2>
-//     <Button>Click me</Button>
-//   </>
-// );
 root.render(<App />);
