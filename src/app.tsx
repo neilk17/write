@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import JournalEditor from "./components/JournalEditor";
 import JournalEntries from "./components/JournalEntries";
 import { Button } from "./components/ui/button";
+import { ThemeProvider } from "./components/theme-provider";
+import { ThemeToggle } from "./components/ui/theme-toggle";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -43,7 +45,8 @@ function App() {
     <>
       {selectedFolder ? (
         <>
-          <div className="flex justify-end m-6 space-x-4">
+          <div className="flex justify-end m-6 space-x-4 items-center">
+            <ThemeToggle />
             {mode === "write" ? (
               <Button onClick={() => setMode("read")}>Read</Button>
             ) : (
@@ -75,6 +78,9 @@ function App() {
           <Button onClick={handleFolderSelect}>
             Choose a different folder
           </Button>
+          <div className="mt-4">
+            <ThemeToggle />
+          </div>
         </div>
       )}
     </>
@@ -82,4 +88,8 @@ function App() {
 }
 
 const root = createRoot(document.body);
-root.render(<App />);
+root.render(
+  <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+    <App />
+  </ThemeProvider>
+);
