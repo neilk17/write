@@ -28,17 +28,8 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
 
   return (
     <div className="journal-editor">
-      <p className="text-muted-foreground">
-        {new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
       <div className="editor-container">
         <Textarea
-          placeholder="Write your thoughts..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="h-64 p-4"
