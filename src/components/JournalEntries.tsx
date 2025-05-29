@@ -136,7 +136,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
                   .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
                   .map((dateKey) => (
                     <div key={dateKey} className="mb-4">
-                      <h3 className="font-medium text-sidebar-primary mb-2">
+                      <h3 className="font-medium text-primary mb-2">
                         {dateKey}
                       </h3>
                       <ul className="space-y-1 pl-2">
