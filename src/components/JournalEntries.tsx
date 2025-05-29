@@ -166,7 +166,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
             {selectedEntry ? (
               <div>
                 <h3 className="text-xl font-semibold mb-2">{selectedEntry}</h3>
-                <div className="p-4 bg-card rounded-lg whitespace-pre-wrap">
+                <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap">
                   {entryContent}
                 </div>
               </div>

@@ -28,7 +28,7 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
 
   return (
     <div className="journal-editor">
-      <p className="text-xl text-gray-400">
+      <p className="text-muted-foreground">
         {new Date().toLocaleDateString("en-US", {
           weekday: "long",
           year: "numeric",
@@ -41,7 +41,7 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
           placeholder="Write your thoughts..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full h-64 p-4 text-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none dark:text-white dark:placeholder-gray-400"
+          className="h-64 p-4"
         />
         <Button onClick={handleSave} disabled={!content.trim()}>
           Save Entry
