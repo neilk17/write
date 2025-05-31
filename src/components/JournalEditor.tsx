@@ -1,28 +1,47 @@
-import { EditorProvider } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { useState } from "react";
+import { Save } from "lucide-react";
+import { useEffect, useState } from "react";
 import getFormattedTimestamp from "../lib/dates";
 import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { Save } from "lucide-react";
 
 const extensions = [StarterKit];
 
 interface TiptapProps {
   content: string;
+  onUpdate: (content: string) => void;
 }
 
-const Tiptap = ({ content }: TiptapProps) => {
+const Tiptap = ({ content, onUpdate }: TiptapProps) => {
+  const editor = useEditor({
+    extensions,
+    content,
+    onUpdate: ({ editor }) => {
+      onUpdate(editor.getText());
+    },
+    editorProps: {
+      attributes: {
+        class:
+          "tiptap placeholder:text-muted-foreground dark:bg-input/30 field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (editor && content === "") {
+      editor.commands.setContent("");
+    }
+  }, [content, editor]);
+
   return (
-    <EditorProvider extensions={extensions} content={content}>
-      {/* <FloatingMenu editor={null}>This is the floating menu</FloatingMenu> */}
-      {/* <BubbleMenu editor={null}>This is the bubble menu</BubbleMenu> */}
-    </EditorProvider>
+    <>
+      <EditorContent editor={editor} />
+    </>
   );
 };
 
 function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
-  const [content, setContent] = useState("Start writing");
+  const [content, setContent] = useState("");
 
   const handleSave = async () => {
     if (!content.trim()) {
@@ -46,16 +65,14 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
 
   return (
     <div className="journal-editor">
-      <div className="editor-container">
-        <Tiptap content={content} />
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="h-64 p-4"
-        />
-        <Button onClick={handleSave} disabled={!content.trim()}>
-          <Save />
-        </Button>
+      <div className="editor-container space-y-4">
+        <Tiptap content={content} onUpdate={setContent} />
+        <div className="">
+          <Button onClick={handleSave} disabled={!content.trim()}>
+            <Save className="mr-2" />
+            Save
+          </Button>
+        </div>
       </div>
     </div>
   );
