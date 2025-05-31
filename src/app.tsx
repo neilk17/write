@@ -5,6 +5,12 @@ import JournalEntries from "./components/JournalEntries";
 import { Button } from "./components/ui/button";
 import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/ui/theme-toggle";
+import { PencilLine, BookOpen, FolderCog } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./components/ui/tooltip";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -48,13 +54,38 @@ function App() {
           <div className="flex justify-end m-6 space-x-4 items-center">
             <ThemeToggle />
             {mode === "write" ? (
-              <Button onClick={() => setMode("read")}>Read</Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={() => setMode("read")}>
+                    <BookOpen />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Read</p>
+                </TooltipContent>
+              </Tooltip>
             ) : (
-              <Button onClick={() => setMode("write")}>Write</Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={() => setMode("write")}>
+                    <PencilLine />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Write</p>
+                </TooltipContent>
+              </Tooltip>
             )}
-            <Button variant="outline" onClick={handleFolderSelect}>
-              Change Folder
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={handleFolderSelect}>
+                  <FolderCog />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Change folder</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           {mode === "write" ? (
             <JournalEditor selectedFolder={selectedFolder} />

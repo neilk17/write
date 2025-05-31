@@ -132,3 +132,7 @@ body {
 textarea {
   resize: none;
 }
+
+.lucide {
+  stroke-width: 2px;
+}

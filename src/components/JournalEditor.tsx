@@ -1,10 +1,28 @@
-import getFormattedTimestamp from "../lib/dates";
+import { EditorProvider } from "@tiptap/react";
+import { StarterKit } from "@tiptap/starter-kit";
 import { useState } from "react";
+import getFormattedTimestamp from "../lib/dates";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { Save } from "lucide-react";
+
+const extensions = [StarterKit];
+
+interface TiptapProps {
+  content: string;
+}
+
+const Tiptap = ({ content }: TiptapProps) => {
+  return (
+    <EditorProvider extensions={extensions} content={content}>
+      {/* <FloatingMenu editor={null}>This is the floating menu</FloatingMenu> */}
+      {/* <BubbleMenu editor={null}>This is the bubble menu</BubbleMenu> */}
+    </EditorProvider>
+  );
+};
 
 function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState("Start writing");
 
   const handleSave = async () => {
     if (!content.trim()) {
@@ -29,13 +47,14 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
   return (
     <div className="journal-editor">
       <div className="editor-container">
+        <Tiptap content={content} />
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="h-64 p-4"
         />
         <Button onClick={handleSave} disabled={!content.trim()}>
-          Save Entry
+          <Save />
         </Button>
       </div>
     </div>
