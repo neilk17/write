@@ -3,9 +3,8 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: "Menlo", "JetBrains Mono", "Segoe UI";
+  /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; */
   margin: auto;
   max-width: 38rem;
 }
@@ -131,4 +130,16 @@ body {
 
 textarea {
   resize: none;
+}
+
+.lucide {
+  stroke-width: 2px;
+}
+
+.tiptap {
+  font-size: 24px;
+}
+
+.tiptap ::selection {
+  background: #ffe066;
 }
