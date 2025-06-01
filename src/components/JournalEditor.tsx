@@ -28,8 +28,11 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
   });
 
   useEffect(() => {
-    if (editor && content === "") {
-      editor.commands.setContent("");
+    if (editor) {
+      if (content === "") {
+        editor.commands.setContent("");
+      }
+      editor.commands.focus();
     }
   }, [content, editor]);
 
