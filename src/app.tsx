@@ -1,21 +1,29 @@
+import { BookOpen, FolderCog, PencilLine } from "lucide-react";
+import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect } from "react";
 import JournalEditor from "./components/JournalEditor";
 import JournalEntries from "./components/JournalEntries";
-import { Button } from "./components/ui/button";
 import { ThemeProvider } from "./components/theme-provider";
+import { Button } from "./components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./components/ui/card";
 import { ThemeToggle } from "./components/ui/theme-toggle";
-import { PencilLine, BookOpen, FolderCog } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "./components/ui/tooltip";
+import { cn } from "./lib/utils";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [defaultPath, setDefaultPath] = useState("");
-  const [mode, setMode] = useState("write"); // 'write' or 'read'
+  const [mode, setMode] = useState("write");
 
   useEffect(() => {
     const loadDefaultPath = async () => {
@@ -35,8 +43,13 @@ function App() {
   const handleFolderSelect = async () => {
     try {
       const folder = await window.api.selectDirectory();
+      console.log("Folder selected in renderer:", folder);
       if (folder) {
         setSelectedFolder(folder);
+        // Explicitly update the config to ensure the path is saved
+        console.log("About to update config from renderer with:", folder);
+        const result = await window.api.updateConfig({ defaultPath: folder });
+        console.log("Config update result from renderer:", result);
       }
     } catch (error) {
       console.error("Error selecting folder:", error);
@@ -94,10 +107,40 @@ function App() {
           )}
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <div className="mt-8"></div>
-          <h1 className="text-2xl font-bold">Welcome to write.</h1>
-          <p>The goal of this app is to minimize the friction in writing.</p>
+        <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+          <div className={cn("flex flex-col gap-6")}>
+            <Card className="w-96">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">
+                  <div className="">
+                    <h1>
+                      Welcome to{" "}
+                      <span className="realistic-marker-highlight">Write</span>
+                    </h1>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  This app is built for one thing and one thing only.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form>
+                  <div className="grid gap-6">
+                    <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                      <span className="bg-card text-muted-foreground relative z-10 px-2">
+                        Save your writings
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <Button onClick={handleFolderSelect} className="w-full">
+                        Select folder
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
           {defaultPath && (
             <div className="mb-4">
               <p className="text-sm mb-2">Previous folder: {defaultPath}</p>
@@ -106,12 +149,6 @@ function App() {
               </Button>
             </div>
           )}
-          <Button onClick={handleFolderSelect}>
-            Choose a different folder
-          </Button>
-          <div className="mt-4">
-            <ThemeToggle />
-          </div>
         </div>
       )}
     </>
