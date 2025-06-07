@@ -140,3 +140,11 @@ textarea {
 .tiptap ::selection {
   background: #ffe066;
 }
+
+.navbar {
+  -webkit-app-region: drag;
+}
+
+.navbar-button {
+  -webkit-app-region: no-drag;
+}

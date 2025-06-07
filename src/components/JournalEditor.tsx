@@ -67,15 +67,17 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
   };
 
   return (
-    <div className="journal-editor">
-      <div className="editor-container space-y-4">
-        <Tiptap content={content} onUpdate={setContent} />
-        <div className="">
-          <Button onClick={handleSave} disabled={!content.trim()}>
-            <Save className="mr-2" />
-            Save
-          </Button>
-        </div>
+    <div className="@container w-full max-w-full px-2 sm:px-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
+      <Tiptap content={content} onUpdate={setContent} />
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={handleSave}
+          disabled={!content.trim()}
+          className="w-full sm:w-auto"
+        >
+          <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">Save</span>
+        </Button>
       </div>
     </div>
   );
