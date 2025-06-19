@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { Edit, Save, X } from "lucide-react";
 
 interface FileEntry {
   name: string;
-  modifiedTime: string;
+  createdAt: string;
+  modifiedAt: string;
 }
 
 interface GroupedEntries {
@@ -16,6 +20,8 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
   const [entryContent, setEntryContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editContent, setEditContent] = useState<string>("");
 
   useEffect(() => {
     if (selectedFolder) {
@@ -29,11 +35,14 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
     try {
       const files = await window.api.listEntries(folderPath);
 
-      // Sort entries by modification time (newest first)
+      // Sort entries by creation time (newest first)
       const sortedEntries = [...files].sort((a, b) => {
+        // Primary sort by creation date, secondary by modification date
+        const createdDiff =
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (createdDiff !== 0) return createdDiff;
         return (
-          new Date(b.modifiedTime).getTime() -
-          new Date(a.modifiedTime).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       });
 
@@ -58,7 +67,8 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
     const grouped: GroupedEntries = {};
 
     entries.forEach((entry) => {
-      const dateStr = formatDateTime(entry.modifiedTime, "date-only");
+      // Group by creation date
+      const dateStr = formatDateTime(entry.createdAt, "date-only");
       if (!grouped[dateStr]) {
         grouped[dateStr] = [];
       }
@@ -75,10 +85,39 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
         const content = await window.api.readFile(currentPath, filename);
         setEntryContent(content);
         setSelectedEntry(entry.name);
+        setIsEditing(false);
+        setEditContent(content);
       }
     } catch (error) {
       console.error("Error loading entry content:", error);
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    if (selectedEntry) {
+      try {
+        const success = await window.api.saveFile(
+          currentPath,
+          selectedEntry,
+          editContent
+        );
+        if (success) {
+          setEntryContent(editContent);
+          setIsEditing(false);
+        }
+      } catch (error) {
+        console.error("Error saving file:", error);
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setEditContent(entryContent);
+    setIsEditing(false);
   };
 
   const formatDateTime = (
@@ -86,6 +125,12 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
     format: "full" | "date-only" | "time-only" = "full"
   ): string => {
     try {
+      // Handle undefined or null timestamps
+      if (!timestamp) {
+        console.error("Empty timestamp received:", timestamp);
+        return "Unknown date";
+      }
+
       const date = new Date(timestamp);
 
       // Check if date is valid
@@ -151,7 +196,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
                             onClick={() => loadEntryContent(entry.name)}
                           >
                             <div className="text-sm">
-                              {formatDateTime(entry.modifiedTime, "time-only")}
+                              {formatDateTime(entry.createdAt, "time-only")}
                             </div>
                           </li>
                         ))}
@@ -165,10 +210,41 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
           <div className="w-2/3 pl-4">
             {selectedEntry ? (
               <div>
-                <h3 className="text-xl font-semibold mb-2">{selectedEntry}</h3>
-                <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap">
-                  {entryContent}
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold">{selectedEntry}</h3>
+                  {!isEditing ? (
+                    <Button onClick={handleEdit} size="sm" variant="ghost">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button onClick={handleSave} size="sm">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button
+                        onClick={handleCancel}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
                 </div>
+                {isEditing ? (
+                  <Textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="min-h-[400px] font-mono text-sm"
+                    placeholder="Write your thoughts..."
+                  />
+                ) : (
+                  <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap">
+                    {entryContent}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-500">Select a file to view its content</p>

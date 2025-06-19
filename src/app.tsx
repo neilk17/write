@@ -1,9 +1,7 @@
-import { BookOpen, FolderCog, PencilLine } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import JournalEditor from "./components/JournalEditor";
-import JournalEntries from "./components/JournalEntries";
-import { ThemeProvider } from "./components/theme-provider";
+import { BookOpen, FolderCog, PencilLine } from "lucide-react";
+
 import { Button } from "./components/ui/button";
 import {
   Card,
@@ -12,6 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import JournalEditor from "./components/JournalEditor";
+import JournalEntries from "./components/JournalEntries";
+import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/ui/theme-toggle";
 import {
   Tooltip,

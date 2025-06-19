@@ -5,6 +5,10 @@ import * as os from 'os';
 const CONFIG_DIR = path.join(os.homedir(), '.write');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
+export interface Config {
+    defaultPath?: string;
+}
+
 /**
  * Ensures the config directory and file exist
  */
@@ -24,7 +28,7 @@ function ensureConfigExists(): void {
  * Gets the current configuration
  * @returns The configuration object
  */
-export function getConfig(): { defaultPath: string, [key: string]: any } {
+export function getConfig(): Config {
     ensureConfigExists();
     try {
         const configData = fs.readFileSync(CONFIG_FILE, 'utf8');
@@ -40,7 +44,7 @@ export function getConfig(): { defaultPath: string, [key: string]: any } {
  * @param updates Object containing updates to apply to the config
  * @returns The updated configuration
  */
-export function updateConfig(updates: { [key: string]: any }): { defaultPath: string, [key: string]: any } {
+export function updateConfig(updates: Config): Config {
     ensureConfigExists();
     try {
         const currentConfig = getConfig();

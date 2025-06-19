@@ -52,7 +52,7 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
     }
 
     try {
-      const fileName = getFormattedTimestamp();
+      const fileName = `${getFormattedTimestamp()}.txt`;
       const filePath = await window.api.saveFile(
         selectedFolder,
         fileName,

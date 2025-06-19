@@ -1,7 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import { contextBridge, ipcRenderer } from 'electron';
+import { Config, contextBridge, ipcRenderer } from 'electron';
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('api', {
     readFile: (folder: string, filename: string) => ipcRenderer.invoke('read-file', folder, filename),
     listEntries: (folder: string) => ipcRenderer.invoke('list-entries', folder),
     getConfig: () => ipcRenderer.invoke('get-config'),
-    updateConfig: (updates: any) => ipcRenderer.invoke('update-config', updates)
+    updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates)
 });
 
 window.addEventListener('DOMContentLoaded', () => {

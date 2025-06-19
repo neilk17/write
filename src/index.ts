@@ -117,14 +117,14 @@ app.on('ready', () => {
           const fullPath = path.join(folder, entry.name);
           const stats = fs.statSync(fullPath);
 
-          // Use ISO string format which is reliable for serialization
-          const modifiedTimeStr = stats.mtime.toISOString();
+          // Get both creation and modification times
+          const creationTimeStr = stats.birthtime.toISOString();
+          const modificationTimeStr = stats.mtime.toISOString();
 
           return {
             name: entry.name,
-            isDirectory: entry.isDirectory(),
-            isFile: entry.isFile(),
-            modifiedTime: modifiedTimeStr
+            createdAt: creationTimeStr,
+            modifiedAt: modificationTimeStr
           };
         });
 
