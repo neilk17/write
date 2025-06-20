@@ -1,6 +1,5 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import getFormattedTimestamp from "../lib/dates";
 import { Button } from "./ui/button";
