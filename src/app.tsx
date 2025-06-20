@@ -73,13 +73,10 @@ function App() {
                   <TooltipTrigger asChild>
                     <Button
                       onClick={() => setMode("read")}
-                      size="sm"
-                      className="@md:h-10 @md:px-4 navbar-button"
+                      size="icon"
+                      className="navbar-button"
                     >
-                      <BookOpen className="h-4 w-4 @md:h-5 @md:w-5" />
-                      <span className="sr-only @md:not-sr-only @md:ml-2">
-                        Read
-                      </span>
+                      <BookOpen className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -91,13 +88,10 @@ function App() {
                   <TooltipTrigger asChild>
                     <Button
                       onClick={() => setMode("write")}
-                      size="sm"
-                      className="@md:h-10 @md:px-4 navbar-button"
+                      size="icon"
+                      className="navbar-button"
                     >
-                      <PencilLine className="h-4 w-4 @md:h-5 @md:w-5" />
-                      <span className="sr-only @md:not-sr-only @md:ml-2">
-                        Write
-                      </span>
+                      <PencilLine className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -110,13 +104,10 @@ function App() {
                   <Button
                     variant="outline"
                     onClick={handleFolderSelect}
-                    size="sm"
-                    className="@md:h-10 @md:px-4 navbar-button"
+                    size="icon"
+                    className="navbar-button"
                   >
-                    <FolderCog className="h-4 w-4 @md:h-5 @md:w-5" />
-                    <span className="sr-only @md:not-sr-only @md:ml-2">
-                      Folder
-                    </span>
+                    <FolderCog className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

@@ -11,4 +11,22 @@ const getFormattedTimestamp = () => {
 
     return fileName;
 };
+
+export const extractParentFromFilename = (filename: string): string | null => {
+    if (filename.includes('--reply-')) {
+        return filename.split('--reply-')[0] + '.txt';
+    }
+    return null;
+};
+
+export const isReplyFile = (filename: string): boolean => {
+    return filename.includes('--reply-');
+};
+
+export const createReplyFilename = (parentFilename: string): string => {
+    const parentBase = parentFilename.replace('.txt', '');
+    const timestamp = getFormattedTimestamp();
+    return `${parentBase}--reply-${timestamp}.txt`;
+};
+
 export default getFormattedTimestamp;

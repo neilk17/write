@@ -12,6 +12,9 @@ interface FileEntry {
     name: string;
     createdAt: string;
     modifiedAt: string;
+    isReply?: boolean;
+    parentFile?: string;
+    replies?: FileEntry[];
 }
 
 declare global {

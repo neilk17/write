@@ -22,7 +22,7 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap placeholder:text-muted-foreground dark:bg-input/30 field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "tiptap placeholder:text-muted-foreground field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
       },
     },
   });
@@ -73,9 +73,10 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
         <Button
           onClick={handleSave}
           disabled={!content.trim()}
+          size="sm"
           className="w-full sm:w-auto"
+          variant={content.trim() ? "default" : "outline"}
         >
-          <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           <span className="text-sm sm:text-base">Save</span>
         </Button>
       </div>

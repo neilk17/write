@@ -133,10 +133,6 @@ textarea {
   stroke-width: 2px;
 }
 
-.tiptap {
-  font-size: 24px;
-}
-
 .tiptap ::selection {
   background: #ffe066;
 }
