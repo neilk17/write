@@ -22,7 +22,7 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap placeholder:text-muted-foreground dark:bg-input/30 field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "tiptap placeholder:text-muted-foreground field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
       },
     },
   });
@@ -52,7 +52,7 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
     }
 
     try {
-      const fileName = getFormattedTimestamp();
+      const fileName = `${getFormattedTimestamp()}.txt`;
       const filePath = await window.api.saveFile(
         selectedFolder,
         fileName,
@@ -67,15 +67,18 @@ function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
   };
 
   return (
-    <div className="journal-editor">
-      <div className="editor-container space-y-4">
-        <Tiptap content={content} onUpdate={setContent} />
-        <div className="">
-          <Button onClick={handleSave} disabled={!content.trim()}>
-            <Save className="mr-2" />
-            Save
-          </Button>
-        </div>
+    <div className="@container w-full max-w-full px-2 sm:px-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
+      <Tiptap content={content} onUpdate={setContent} />
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={handleSave}
+          disabled={!content.trim()}
+          size="sm"
+          className="w-full sm:w-auto"
+          variant={content.trim() ? "default" : "outline"}
+        >
+          <span className="text-sm sm:text-base">Save</span>
+        </Button>
       </div>
     </div>
   );

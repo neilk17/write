@@ -1,9 +1,7 @@
-import { BookOpen, FolderCog, PencilLine } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import JournalEditor from "./components/JournalEditor";
-import JournalEntries from "./components/JournalEntries";
-import { ThemeProvider } from "./components/theme-provider";
+import { BookOpen, FolderCog, PencilLine } from "lucide-react";
+
 import { Button } from "./components/ui/button";
 import {
   Card,
@@ -12,6 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import JournalEditor from "./components/JournalEditor";
+import JournalEntries from "./components/JournalEntries";
+import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/ui/theme-toggle";
 import {
   Tooltip,
@@ -61,50 +62,67 @@ function App() {
   };
 
   return (
-    <>
+    <div className="app-container relative min-h-svh">
       {selectedFolder ? (
         <>
-          <div className="flex justify-end m-6 space-x-4 items-center">
-            <ThemeToggle />
-            {mode === "write" ? (
+          <div className="@container navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
+            <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
+              <ThemeToggle />
+              {mode === "write" ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setMode("read")}
+                      size="icon"
+                      className="navbar-button"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Read</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setMode("write")}
+                      size="icon"
+                      className="navbar-button"
+                    >
+                      <PencilLine className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Write</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => setMode("read")}>
-                    <BookOpen />
+                  <Button
+                    variant="outline"
+                    onClick={handleFolderSelect}
+                    size="icon"
+                    className="navbar-button"
+                  >
+                    <FolderCog className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Read</p>
+                  <p>Change folder</p>
                 </TooltipContent>
               </Tooltip>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={() => setMode("write")}>
-                    <PencilLine />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Write</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" onClick={handleFolderSelect}>
-                  <FolderCog />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Change folder</p>
-              </TooltipContent>
-            </Tooltip>
+            </div>
           </div>
-          {mode === "write" ? (
-            <JournalEditor selectedFolder={selectedFolder} />
-          ) : (
-            <JournalEntries selectedFolder={selectedFolder} />
-          )}
+          <div className="@container px-2 sm:px-4 md:px-6">
+            {mode === "write" ? (
+              <JournalEditor selectedFolder={selectedFolder} />
+            ) : (
+              <JournalEntries selectedFolder={selectedFolder} />
+            )}
+          </div>
         </>
       ) : (
         <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
@@ -132,7 +150,10 @@ function App() {
                       </span>
                     </div>
                     <div className="flex flex-col gap-4">
-                      <Button onClick={handleFolderSelect} className="w-full">
+                      <Button
+                        onClick={handleFolderSelect}
+                        className="w-full navbar-button"
+                      >
                         Select folder
                       </Button>
                     </div>
@@ -151,7 +172,7 @@ function App() {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -133,10 +133,14 @@ textarea {
   stroke-width: 2px;
 }
 
-.tiptap {
-  font-size: 24px;
-}
-
 .tiptap ::selection {
   background: #ffe066;
+}
+
+.navbar {
+  -webkit-app-region: drag;
+}
+
+.navbar-button {
+  -webkit-app-region: no-drag;
 }
