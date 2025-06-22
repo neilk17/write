@@ -26,15 +26,17 @@ function App() {
   const [defaultPath, setDefaultPath] = useState("");
   const [mode, setMode] = useState("write");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
   useEffect(() => {
-    if (saveStatus === 'saved') {
+    if (saveStatus === "saved") {
       setShowSavedIndicator(true);
       const timer = setTimeout(() => {
         setShowSavedIndicator(false);
-        setSaveStatus('idle');
+        setSaveStatus("idle");
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -88,9 +90,13 @@ function App() {
               )}
               {mode === "write" && (
                 <div className="text-sm text-muted-foreground">
-                  {saveStatus === 'saving' && "Saving..."}
-                  {saveStatus === 'saved' && (
-                    <span className={`transition-opacity duration-1000 ease-out ${showSavedIndicator ? 'opacity-100' : 'opacity-0'}`}>
+                  {saveStatus === "saving" && "Saving..."}
+                  {saveStatus === "saved" && (
+                    <span
+                      className={`transition-opacity duration-1000 ease-out ${
+                        showSavedIndicator ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
                       ✓ Saved
                     </span>
                   )}
@@ -149,9 +155,9 @@ function App() {
           </div>
           <div className="@container px-2 sm:px-4 md:px-6">
             {mode === "write" ? (
-              <JournalEditor 
-                selectedFolder={selectedFolder} 
-                onFileNameChange={setCurrentFileName}
+              <JournalEditor
+                selectedFolder={selectedFolder}
+                onFileUpdate={setCurrentFileName}
                 onSaveStatusChange={setSaveStatus}
               />
             ) : (
