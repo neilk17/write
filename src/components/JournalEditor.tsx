@@ -1,9 +1,8 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
+import { Placeholder } from "@tiptap/extension-placeholder";
 import { useEffect, useRef, useState } from "react";
 import getFormattedTimestamp from "../lib/dates";
-
-const extensions = [StarterKit];
 
 interface TiptapProps {
   content: string;
@@ -12,11 +11,16 @@ interface TiptapProps {
 
 const Tiptap = ({ content, onUpdate }: TiptapProps) => {
   const editor = useEditor({
-    extensions,
     content,
     onUpdate: ({ editor }) => {
       onUpdate(editor.getText());
     },
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: "Write…",
+      }),
+    ],
     editorProps: {
       attributes: {
         class:
@@ -34,11 +38,7 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     }
   }, [content, editor]);
 
-  return (
-    <>
-      <EditorContent editor={editor} />
-    </>
-  );
+  return <EditorContent editor={editor} />;
 };
 
 function JournalEditor({
@@ -53,6 +53,36 @@ function JournalEditor({
   const [content, setContent] = useState("");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const contentRef = useRef(content);
+  const currentFileNameRef = useRef(currentFileName);
+
+  // Keep refs updated
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  useEffect(() => {
+    currentFileNameRef.current = currentFileName;
+  }, [currentFileName]);
+
+  // Save pending content when component unmounts
+  useEffect(() => {
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+        // Save immediately if there's unsaved content
+        if (contentRef.current.trim()) {
+          const contentToSave = contentRef.current;
+          let fileName = currentFileNameRef.current;
+          if (!fileName) {
+            fileName = `${getFormattedTimestamp()}.txt`;
+          }
+          // Fire and forget - can't await in cleanup
+          window.api.saveFile(selectedFolder, fileName, contentToSave);
+        }
+      }
+    };
+  }, [selectedFolder]); // Only selectedFolder in deps since it's from props
 
   const handleSave = async (newContent?: string) => {
     const contentToSave = newContent || content;
