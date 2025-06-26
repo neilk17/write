@@ -2,9 +2,9 @@
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 
-body {
+/* body {
   font-family: "Menlo", "JetBrains Mono", "Segoe UI";
-}
+} */
 
 :root {
   --background: oklch(1 0 0);
@@ -131,10 +131,6 @@ textarea {
 
 .lucide {
   stroke-width: 2px;
-}
-
-.tiptap ::selection {
-  background: #ffe066;
 }
 
 .navbar {
