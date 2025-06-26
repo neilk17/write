@@ -1,10 +1,8 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { useEffect, useState } from "react";
+import { Placeholder } from "@tiptap/extension-placeholder";
+import { useEffect, useRef, useState } from "react";
 import getFormattedTimestamp from "../lib/dates";
-import { Button } from "./ui/button";
-
-const extensions = [StarterKit];
 
 interface TiptapProps {
   content: string;
@@ -13,11 +11,16 @@ interface TiptapProps {
 
 const Tiptap = ({ content, onUpdate }: TiptapProps) => {
   const editor = useEditor({
-    extensions,
     content,
     onUpdate: ({ editor }) => {
       onUpdate(editor.getText());
     },
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: "Write…",
+      }),
+    ],
     editorProps: {
       attributes: {
         class:
@@ -35,50 +38,90 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     }
   }, [content, editor]);
 
-  return (
-    <>
-      <EditorContent editor={editor} />
-    </>
-  );
+  return <EditorContent editor={editor} />;
 };
 
-function JournalEditor({ selectedFolder }: { selectedFolder: string }) {
+function JournalEditor({
+  selectedFolder,
+  onFileUpdate,
+  onSaveStatusChange,
+}: {
+  selectedFolder: string;
+  onFileUpdate?: (fileName: string | null) => void;
+  onSaveStatusChange?: (status: "idle" | "saving" | "saved") => void;
+}) {
   const [content, setContent] = useState("");
+  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
+  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const contentRef = useRef(content);
+  const currentFileNameRef = useRef(currentFileName);
 
-  const handleSave = async () => {
-    if (!content.trim()) {
+  // Keep refs updated
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
+  useEffect(() => {
+    currentFileNameRef.current = currentFileName;
+  }, [currentFileName]);
+
+  // Save pending content when component unmounts
+  useEffect(() => {
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+        // Save immediately if there's unsaved content
+        if (contentRef.current.trim()) {
+          const contentToSave = contentRef.current;
+          let fileName = currentFileNameRef.current;
+          if (!fileName) {
+            fileName = `${getFormattedTimestamp()}.txt`;
+          }
+          // Fire and forget - can't await in cleanup
+          window.api.saveFile(selectedFolder, fileName, contentToSave);
+        }
+      }
+    };
+  }, [selectedFolder]); // Only selectedFolder in deps since it's from props
+
+  const handleSave = async (newContent?: string) => {
+    const contentToSave = newContent || content;
+    if (!contentToSave.trim()) {
       return;
     }
 
+    onSaveStatusChange?.("saving");
+
     try {
-      const fileName = `${getFormattedTimestamp()}.txt`;
-      const filePath = await window.api.saveFile(
-        selectedFolder,
-        fileName,
-        content
-      );
-      if (filePath) {
-        setContent("");
+      let fileName = currentFileName;
+      if (!fileName) {
+        fileName = `${getFormattedTimestamp()}.txt`;
+        setCurrentFileName(fileName);
+        onFileUpdate?.(fileName);
       }
+      await window.api.saveFile(selectedFolder, fileName, contentToSave);
+      onSaveStatusChange?.("saved");
     } catch (error) {
       console.error("Error saving journal entry:", error);
+      onSaveStatusChange?.("idle");
+    }
+  };
+
+  const handleContentUpdate = (newContent: string) => {
+    setContent(newContent);
+    clearTimeout(autosaveTimeoutRef.current);
+    onSaveStatusChange?.("idle");
+
+    if (newContent.trim()) {
+      autosaveTimeoutRef.current = setTimeout(() => {
+        handleSave(newContent);
+      }, 2000);
     }
   };
 
   return (
     <div className="@container w-full max-w-full px-2 sm:px-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
-      <Tiptap content={content} onUpdate={setContent} />
-      <div className="flex justify-between items-center">
-        <Button
-          onClick={handleSave}
-          disabled={!content.trim()}
-          size="sm"
-          className="w-full sm:w-auto"
-          variant={content.trim() ? "default" : "outline"}
-        >
-          <span className="text-sm sm:text-base">Save</span>
-        </Button>
-      </div>
+      <Tiptap content={content} onUpdate={handleContentUpdate} />
     </div>
   );
 }

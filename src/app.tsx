@@ -25,6 +25,22 @@ function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [defaultPath, setDefaultPath] = useState("");
   const [mode, setMode] = useState("write");
+  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+
+  useEffect(() => {
+    if (saveStatus === "saved") {
+      setShowSavedIndicator(true);
+      const timer = setTimeout(() => {
+        setShowSavedIndicator(false);
+        setSaveStatus("idle");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveStatus]);
 
   useEffect(() => {
     const loadDefaultPath = async () => {
@@ -66,6 +82,27 @@ function App() {
       {selectedFolder ? (
         <>
           <div className="@container navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
+            <div className="flex items-center gap-4">
+              {mode === "write" && currentFileName && (
+                <div className="text-sm text-muted-foreground">
+                  {currentFileName}
+                </div>
+              )}
+              {mode === "write" && (
+                <div className="text-sm text-muted-foreground">
+                  {saveStatus === "saving" && "Saving..."}
+                  {saveStatus === "saved" && (
+                    <span
+                      className={`transition-opacity duration-1000 ease-out ${
+                        showSavedIndicator ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      ✓ Saved
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
               <ThemeToggle />
               {mode === "write" ? (
@@ -118,7 +155,11 @@ function App() {
           </div>
           <div className="@container px-2 sm:px-4 md:px-6">
             {mode === "write" ? (
-              <JournalEditor selectedFolder={selectedFolder} />
+              <JournalEditor
+                selectedFolder={selectedFolder}
+                onFileUpdate={setCurrentFileName}
+                onSaveStatusChange={setSaveStatus}
+              />
             ) : (
               <JournalEntries selectedFolder={selectedFolder} />
             )}
