@@ -135,6 +135,95 @@ app.on('ready', () => {
     }
   });
 
+  ipcMain.handle('search-files', async (_, folder, searchTerm) => {
+    try {
+      if (!fs.existsSync(folder) || !searchTerm) {
+        return [];
+      }
+
+      const entries = fs.readdirSync(folder, { withFileTypes: true });
+      const searchResults = [];
+      const matchedParentNames = new Set();
+
+      // Helper function to check if a file is a reply
+      const isReplyFile = (filename: string) => filename.includes('--reply-');
+      
+      // Helper function to extract parent filename from reply
+      const extractParentFromFilename = (filename: string) => {
+        if (filename.includes('--reply-')) {
+          return filename.split('--reply-')[0] + '.txt';
+        }
+        return null;
+      };
+
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.endsWith('.txt')) {
+          const fullPath = path.join(folder, entry.name);
+          const stats = fs.statSync(fullPath);
+          
+          // Check filename match
+          const filenameMatch = entry.name.toLowerCase().includes(searchTerm.toLowerCase());
+          
+          // Check content match
+          let contentMatch = false;
+          let contentPreview = '';
+          try {
+            const content = fs.readFileSync(fullPath, 'utf-8');
+            contentMatch = content.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            if (contentMatch) {
+              // Get preview text around the match
+              const lowerContent = content.toLowerCase();
+              const lowerSearchTerm = searchTerm.toLowerCase();
+              const matchIndex = lowerContent.indexOf(lowerSearchTerm);
+              const start = Math.max(0, matchIndex - 50);
+              const end = Math.min(content.length, matchIndex + searchTerm.length + 50);
+              contentPreview = content.substring(start, end);
+            }
+          } catch (error) {
+            console.error(`Error reading file ${entry.name}:`, error);
+          }
+
+          if (filenameMatch || contentMatch) {
+            searchResults.push({
+              name: entry.name,
+              createdAt: stats.birthtime.toISOString(),
+              modifiedAt: stats.mtime.toISOString(),
+              matchType: filenameMatch ? 'filename' : 'content',
+              contentPreview: contentPreview
+            });
+
+            // If this is a reply file that matches, also include its parent
+            if (isReplyFile(entry.name)) {
+              const parentName = extractParentFromFilename(entry.name);
+              if (parentName && !matchedParentNames.has(parentName)) {
+                matchedParentNames.add(parentName);
+                
+                // Check if parent file exists and add it
+                const parentPath = path.join(folder, parentName);
+                if (fs.existsSync(parentPath)) {
+                  const parentStats = fs.statSync(parentPath);
+                  searchResults.push({
+                    name: parentName,
+                    createdAt: parentStats.birthtime.toISOString(),
+                    modifiedAt: parentStats.mtime.toISOString(),
+                    matchType: 'parent-of-match',
+                    contentPreview: ''
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return searchResults;
+    } catch (error) {
+      console.error('Error searching files:', error);
+      return [];
+    }
+  });
+
   createWindow();
 });
 

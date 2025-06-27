@@ -50,6 +50,8 @@ interface FileEntry {
   isReply?: boolean;
   parentFile?: string;
   replies?: FileEntry[];
+  matchType?: 'filename' | 'content';
+  contentPreview?: string;
 }
 
 interface GroupedEntries {
@@ -101,12 +103,20 @@ function ReplyItem({ reply, currentPath, formatDateTime }: ReplyItemProps) {
   );
 }
 
-function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
+interface JournalEntriesProps {
+  selectedFolder: string;
+  searchTerm?: string;
+  isSearching?: boolean;
+}
+
+function JournalEntries({ selectedFolder, searchTerm = "", isSearching = false }: JournalEntriesProps) {
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [groupedEntries, setGroupedEntries] = useState<GroupedEntries>({});
+  const [searchResults, setSearchResults] = useState<FileEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [entryContent, setEntryContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [searching, setSearching] = useState<boolean>(false);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [isWritingReply, setIsWritingReply] = useState<boolean>(false);
   const [replyContent, setReplyContent] = useState<string>("");
@@ -117,6 +127,72 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
       loadEntries(selectedFolder);
     }
   }, [selectedFolder]);
+
+  useEffect(() => {
+    if (isSearching && searchTerm && selectedFolder) {
+      performSearch(searchTerm);
+    } else {
+      setSearchResults([]);
+      setSearching(false);
+    }
+  }, [searchTerm, isSearching, selectedFolder]);
+
+  const performSearch = async (term: string) => {
+    if (!term.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearching(true);
+    try {
+      const results = await window.api.searchFiles(selectedFolder, term);
+      
+      // Process search results to identify parent-child relationships
+      const processedResults = results.map((file: FileEntry & { matchType?: string; contentPreview?: string }) => ({
+        ...file,
+        isReply: isReplyFile(file.name),
+        parentFile: extractParentFromFilename(file.name),
+        replies: [] as FileEntry[],
+      }));
+
+      // Group search results by parent files, ensuring we include parents when their replies match
+      const parentFiles = processedResults.filter((f: FileEntry) => !f.isReply);
+      const replyFiles = processedResults.filter((f: FileEntry) => f.isReply);
+      
+      // Create a map to track which parents we need to include
+      const parentMap = new Map();
+      
+      // Add all matched parent files
+      parentFiles.forEach((parent) => {
+        parentMap.set(parent.name, parent);
+      });
+      
+      // For each matched reply, ensure its parent is in the results
+      replyFiles.forEach((reply) => {
+        if (reply.parentFile && !parentMap.has(reply.parentFile)) {
+          // Parent not in results yet, we need to add it (it came from the backend as 'parent-of-match')
+          const parentInResults = processedResults.find(f => f.name === reply.parentFile);
+          if (parentInResults) {
+            parentMap.set(reply.parentFile, parentInResults);
+          }
+        }
+      });
+
+      // Attach replies to their parents
+      const finalParents = Array.from(parentMap.values());
+      finalParents.forEach((parent) => {
+        parent.replies = replyFiles.filter(
+          (reply) => reply.parentFile === parent.name
+        );
+      });
+
+      setSearchResults(finalParents);
+      setSearching(false);
+    } catch (error) {
+      console.error("Error searching files:", error);
+      setSearching(false);
+    }
+  };
 
   const loadEntries = async (folderPath: string) => {
     setLoading(true);
@@ -183,13 +259,16 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
 
   const loadEntryContent = async (filename: string) => {
     try {
+      // Use appropriate entry list based on search state
+      const entryList = isSearching ? searchResults : entries;
+      
       // Find the entry (could be a parent or a reply)
-      let entry = entries.find((e) => e.name === filename);
+      let entry = entryList.find((e) => e.name === filename);
       let parentEntry = entry;
 
       // If it's a reply file, find its parent
       if (!entry) {
-        for (const parent of entries) {
+        for (const parent of entryList) {
           const replyEntry = parent.replies?.find((r) => r.name === filename);
           if (replyEntry) {
             entry = replyEntry;
@@ -285,6 +364,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
     }
   };
 
+
   return (
     <div className="journal-entries h-full flex flex-col">
       {loading ? (
@@ -292,7 +372,57 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
       ) : (
         <div className="flex flex-1 overflow-hidden">
           <div className="w-1/3 pr-4 border-r overflow-y-auto max-h-[calc(100vh-120px)]">
-            {Object.keys(groupedEntries).length === 0 ? (
+            {searching ? (
+              <p>Searching...</p>
+            ) : isSearching ? (
+              searchResults.length === 0 ? (
+                <p>No search results found</p>
+              ) : (
+                <div className="space-y-2">
+                  <h3 className="font-medium text-primary mb-2">
+                    Search Results ({searchResults.length})
+                  </h3>
+                  <ul className="space-y-1">
+                    {searchResults.map((entry) => (
+                      <div key={entry.name}>
+                        <li
+                          className={`p-2 rounded cursor-pointer hover:bg-sidebar-accent ${
+                            selectedEntry === entry.name
+                              ? "bg-sidebar-accent"
+                              : ""
+                          }`}
+                          onClick={() => loadEntryContent(entry.name)}
+                        >
+                          <div className="text-sm">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-medium">
+                                {formatDateTime(entry.createdAt, "time-only")}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {entry.matchType === 'filename' ? 'Name' : 'Content'}
+                              </span>
+                            </div>
+                            {entry.contentPreview && (
+                              <div className="text-xs text-muted-foreground truncate">
+                                ...{entry.contentPreview}...
+                              </div>
+                            )}
+                            {entry.replies && entry.replies.length > 0 && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {entry.replies.length} repl{entry.replies.length === 1 ? 'y' : 'ies'}
+                                {entry.replies.some(r => r.matchType === 'content' || r.matchType === 'filename') && 
+                                  <span className="text-blue-600"> (contains matches)</span>
+                                }
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      </div>
+                    ))}
+                  </ul>
+                </div>
+              )
+            ) : Object.keys(groupedEntries).length === 0 ? (
               <p>No entries found</p>
             ) : (
               <div className="space-y-4">
@@ -342,7 +472,8 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
                   <h3 className="text-xl font-semibold">{selectedEntry}</h3>
                 </div>
                 {(() => {
-                  const currentEntry = entries.find(
+                  const entryList = isSearching ? searchResults : entries;
+                  const currentEntry = entryList.find(
                     (e) => e.name === selectedEntry
                   );
 

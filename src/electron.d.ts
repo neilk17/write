@@ -1,4 +1,5 @@
 interface ElectronAPI {
+    searchFiles(selectedFolder: string, term: string): unknown;
     getConfig: () => Promise<Config>;
     selectDirectory: () => Promise<string | null>;
     createDirectory: (path: string, name: string) => Promise<boolean>;
