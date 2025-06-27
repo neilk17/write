@@ -2,6 +2,7 @@ import type { Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
+import path from 'path';
 
 export const mainConfig: Configuration = {
   /**
@@ -15,6 +16,9 @@ export const mainConfig: Configuration = {
   },
   plugins,
   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'), // adjust if your config is not in the project root
+    },
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
 };

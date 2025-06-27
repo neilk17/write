@@ -2,24 +2,38 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BookOpen, FolderCog, PencilLine } from "lucide-react";
 
-import { Button } from "./components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./components/ui/card";
-import JournalEditor from "./components/JournalEditor";
-import JournalEntries from "./components/JournalEntries";
-import { ThemeProvider } from "./components/theme-provider";
-import { ThemeToggle } from "./components/ui/theme-toggle";
+} from "@/components/ui/card";
+import JournalEditor from "@/components/JournalEditor";
+import JournalEntries from "@/components/JournalEntries";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "./components/ui/tooltip";
-import { cn } from "./lib/utils";
+} from "@/components/ui/tooltip";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb"
+import { NavActions } from "@/components/nav-actions";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -80,8 +94,31 @@ function App() {
   return (
     <div className="app-container relative min-h-svh">
       {selectedFolder ? (
-        <>
-          <div className="@container navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2">
+          <div className="flex flex-1 items-center gap-2 px-3">
+            <SidebarTrigger />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="line-clamp-1">
+                    Project Management & Task Tracking
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+          <div className="ml-auto px-3">
+            <NavActions />
+          </div>
+        </header>
+          <div className="@container border navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
             <div className="flex items-center gap-4">
               {mode === "write" && currentFileName && (
                 <div className="text-sm text-muted-foreground">
@@ -164,7 +201,9 @@ function App() {
               <JournalEntries selectedFolder={selectedFolder} />
             )}
           </div>
-        </>
+          </SidebarInset>
+
+        </SidebarProvider>
       ) : (
         <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
           <div className={cn("flex flex-col gap-6")}>
