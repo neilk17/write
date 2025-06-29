@@ -50,44 +50,23 @@ const data = {
       url: "#",
       icon: Search,
     },
-    {
-      title: "Ask AI",
-      url: "#",
-      icon: Sparkles,
-    },
+    // {
+    //   title: "Ask AI",
+    //   url: "#",
+    //   icon: Sparkles,
+    // },
     {
       title: "Home",
       url: "#",
       icon: Home,
       isActive: true,
     },
-    {
-      title: "Inbox",
-      url: "#",
-      icon: Inbox,
-      badge: "10",
-    },
   ],
   navSecondary: [
-    {
-      title: "Calendar",
-      url: "#",
-      icon: Calendar,
-    },
     {
       title: "Settings",
       url: "#",
       icon: Settings2,
-    },
-    {
-      title: "Templates",
-      url: "#",
-      icon: Blocks,
-    },
-    {
-      title: "Trash",
-      url: "#",
-      icon: Trash2,
     },
     {
       title: "Help",
@@ -258,7 +237,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar className="border-r-0 mt-8" {...props}>
+    <Sidebar className="border-r-0 mt-[36px]" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
         <NavMain items={data.navMain} />

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BookOpen, FolderCog, PencilLine } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,12 +11,6 @@ import {
 import JournalEditor from "@/components/JournalEditor";
 import JournalEntries from "@/components/JournalEntries";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   SidebarInset,
   SidebarProvider,
@@ -101,6 +93,10 @@ function App() {
             currentFileName={currentFileName}
             saveStatus={saveStatus}
             showSavedIndicator={showSavedIndicator}
+            mode={mode}
+            onToggleMode={() =>
+              setMode((prev) => (prev === "write" ? "read" : "write"))
+            }
           />
 
           <div className="flex flex-1 min-h-0">
