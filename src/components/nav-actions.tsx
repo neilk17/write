@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -35,6 +34,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "./ui/theme-toggle";
 
 const data = [
   [
@@ -107,10 +107,8 @@ export function NavActions() {
   }, []);
 
   return (
-    <div className="flex border bg-blue-50 items-center gap-2 text-sm">
-      <div className="text-muted-foreground hidden font-medium md:inline-block">
-        Edit Oct 08
-      </div>
+    <div className="flex items-center gap-2 text-sm">
+      <ThemeToggle />
       <Button variant="ghost" size="icon" className="h-7 w-7">
         <Star />
       </Button>

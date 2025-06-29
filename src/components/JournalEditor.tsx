@@ -120,7 +120,7 @@ function JournalEditor({
   };
 
   return (
-    <div className="@container w-full max-w-full px-2 sm:px-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
+    <div className="@container w-full max-w-full px-2 sm:px-4 mt-12 md:px-6 lg:max-w-4xl mx-auto space-y-4">
       <Tiptap content={content} onUpdate={handleContentUpdate} />
     </div>
   );
