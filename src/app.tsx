@@ -23,8 +23,8 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -32,7 +32,7 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 import { NavActions } from "@/components/nav-actions";
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
   const [mode, setMode] = useState("write");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
-    "idle"
+    "idle",
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
@@ -97,112 +97,111 @@ function App() {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="line-clamp-1">
-                    Project Management & Task Tracking
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-          <div className="ml-auto px-3">
-            <NavActions />
-          </div>
-        </header>
-          <div className="@container border navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
-            <div className="flex items-center gap-4">
-              {mode === "write" && currentFileName && (
-                <div className="text-sm text-muted-foreground">
-                  {currentFileName}
-                </div>
-              )}
-              {mode === "write" && (
-                <div className="text-sm text-muted-foreground">
-                  {saveStatus === "saving" && "Saving..."}
-                  {saveStatus === "saved" && (
-                    <span
-                      className={`transition-opacity duration-1000 ease-out ${
-                        showSavedIndicator ? "opacity-100" : "opacity-0"
-                      }`}
+            <header className="flex h-14 shrink-0 items-center gap-2">
+              <div className="flex flex-1 items-center gap-2 px-3">
+                <SidebarTrigger />
+                <Separator
+                  orientation="vertical"
+                  className="mr-2 data-[orientation=vertical]:h-4"
+                />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="line-clamp-1">
+                        Project Management & Task Tracking
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+              <div className="ml-auto px-3">
+                <NavActions />
+              </div>
+            </header>
+            <div className="@container border navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
+              <div className="flex items-center gap-4">
+                {mode === "write" && currentFileName && (
+                  <div className="text-sm text-muted-foreground">
+                    {currentFileName}
+                  </div>
+                )}
+                {mode === "write" && (
+                  <div className="text-sm text-muted-foreground">
+                    {saveStatus === "saving" && "Saving..."}
+                    {saveStatus === "saved" && (
+                      <span
+                        className={`transition-opacity duration-1000 ease-out ${
+                          showSavedIndicator ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        ✓ Saved
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
+                <ThemeToggle />
+                {mode === "write" ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setMode("read")}
+                        size="icon"
+                        className="navbar-button"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Read</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setMode("write")}
+                        size="icon"
+                        className="navbar-button"
+                      >
+                        <PencilLine className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Write</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={handleFolderSelect}
+                      size="icon"
+                      className="navbar-button"
                     >
-                      ✓ Saved
-                    </span>
-                  )}
-                </div>
-              )}
+                      <FolderCog className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Change folder</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
-            <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
-              <ThemeToggle />
+            <div className="@container px-2 sm:px-4 md:px-6">
               {mode === "write" ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setMode("read")}
-                      size="icon"
-                      className="navbar-button"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Read</p>
-                  </TooltipContent>
-                </Tooltip>
+                <JournalEditor
+                  selectedFolder={selectedFolder}
+                  onFileUpdate={setCurrentFileName}
+                  onSaveStatusChange={setSaveStatus}
+                />
               ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setMode("write")}
-                      size="icon"
-                      className="navbar-button"
-                    >
-                      <PencilLine className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Write</p>
-                  </TooltipContent>
-                </Tooltip>
+                <JournalEntries selectedFolder={selectedFolder} />
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={handleFolderSelect}
-                    size="icon"
-                    className="navbar-button"
-                  >
-                    <FolderCog className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Change folder</p>
-                </TooltipContent>
-              </Tooltip>
             </div>
-          </div>
-          <div className="@container px-2 sm:px-4 md:px-6">
-            {mode === "write" ? (
-              <JournalEditor
-                selectedFolder={selectedFolder}
-                onFileUpdate={setCurrentFileName}
-                onSaveStatusChange={setSaveStatus}
-              />
-            ) : (
-              <JournalEntries selectedFolder={selectedFolder} />
-            )}
-          </div>
           </SidebarInset>
-
         </SidebarProvider>
       ) : (
         <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
@@ -260,5 +259,5 @@ const root = createRoot(document.body);
 root.render(
   <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
     <App />
-  </ThemeProvider>
+  </ThemeProvider>,
 );

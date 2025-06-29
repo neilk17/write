@@ -1,8 +1,8 @@
-import type { Configuration } from 'webpack';
-import path from 'path';
+import type { Configuration } from "webpack";
+import path from "path";
 
-import { rules } from './webpack.rules';
-import { plugins } from './webpack.plugins';
+import { rules } from "./webpack.rules";
+import { plugins } from "./webpack.plugins";
 
 export const rendererConfig: Configuration = {
   module: {
@@ -11,8 +11,8 @@ export const rendererConfig: Configuration = {
   plugins,
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      "@": path.resolve(__dirname, "src"),
     },
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
+    extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
   },
 };
