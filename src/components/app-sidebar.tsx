@@ -1,26 +1,20 @@
-import * as React from "react";
 import {
   AudioWaveform,
-  Blocks,
-  Calendar,
   Command,
   Home,
-  Inbox,
   MessageCircleQuestion,
   Search,
   Settings2,
-  Sparkles,
-  Trash2,
 } from "lucide-react";
+import * as React from "react";
 
-import { NavFavorites } from "@/components/nav-favorites";
+import { NavJournalEntries } from "@/components/nav-journal-entries";
 import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavWorkspaces } from "@/components/nav-workspaces";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -55,12 +49,12 @@ const data = {
     //   url: "#",
     //   icon: Sparkles,
     // },
-    {
-      title: "Home",
-      url: "#",
-      icon: Home,
-      isActive: true,
-    },
+    // {
+    //   title: "Home",
+    //   url: "#",
+    //   icon: Home,
+    //   isActive: true,
+    // },
   ],
   navSecondary: [
     {
@@ -235,7 +229,18 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  selectedFolder: string;
+  selectedEntry?: string | null;
+  onEntrySelect?: (name: string) => void;
+}
+
+export function AppSidebar({
+  selectedFolder,
+  selectedEntry,
+  onEntrySelect,
+  ...props
+}: AppSidebarProps) {
   return (
     <Sidebar className="border-r-0 mt-[36px]" {...props}>
       <SidebarHeader>
@@ -243,10 +248,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarContent>
-        <NavFavorites favorites={data.favorites} />
+        <NavJournalEntries
+          selectedFolder={selectedFolder}
+          selectedEntry={selectedEntry}
+          onSelectEntry={onEntrySelect}
+        />
+        {/* <NavFavorites favorites={data.favorites} />
         <NavWorkspaces workspaces={data.workspaces} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
+      <SidebarFooter></SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

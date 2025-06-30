@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
+import { AppSidebar } from "@/components/app-sidebar";
+import Editor from "@/components/Editor";
+import Navbar from "@/components/Navbar";
+import Reader from "@/components/Reader";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,25 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import JournalEditor from "@/components/JournalEditor";
-import JournalEntries from "@/components/JournalEntries";
-import { ThemeProvider } from "@/components/theme-provider";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { NavActions } from "@/components/nav-actions";
-import Navbar from "@/components/Navbar";
+import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
@@ -38,6 +26,11 @@ function App() {
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
+  // Triggered by sidebar click
+  const handleEntrySelect = (name: string) => {
+    setCurrentFileName(name); // remember which file
+    setMode("read"); // switch UI to read mode
+  };
   useEffect(() => {
     if (saveStatus === "saved") {
       setShowSavedIndicator(true);
@@ -100,17 +93,24 @@ function App() {
           />
 
           <div className="flex flex-1 min-h-0">
-            <AppSidebar />
+            <AppSidebar
+              selectedFolder={selectedFolder}
+              selectedEntry={currentFileName}
+              onEntrySelect={handleEntrySelect}
+            />
             <SidebarInset className="flex-1 overflow-auto">
               <div className="@container px-2 sm:px-4 md:px-6">
                 {mode === "write" ? (
-                  <JournalEditor
+                  <Editor
                     selectedFolder={selectedFolder}
                     onFileUpdate={setCurrentFileName}
                     onSaveStatusChange={setSaveStatus}
                   />
                 ) : (
-                  <JournalEntries selectedFolder={selectedFolder} />
+                  <Reader
+                    selectedFolder={selectedFolder}
+                    initialEntry={currentFileName}
+                  />
                 )}
               </div>
             </SidebarInset>
