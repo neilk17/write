@@ -1,7 +1,7 @@
 import {
   AudioWaveform,
+  BookHeart,
   Command,
-  Home,
   MessageCircleQuestion,
   Search,
   Settings2,
@@ -10,7 +10,6 @@ import * as React from "react";
 
 import { NavJournalEntries } from "@/components/nav-journal-entries";
 import { NavMain } from "@/components/nav-main";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -18,22 +17,23 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { VaultSwitcher } from "@/components/vault-switcher";
 
 // This is sample data.
 const data = {
   teams: [
     {
-      name: "Acme Inc",
-      logo: Command,
+      name: "Personal",
+      logo: BookHeart,
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
+      name: "Work",
       logo: AudioWaveform,
       plan: "Startup",
     },
     {
-      name: "Evil Corp.",
+      name: "Evil Corp",
       logo: Command,
       plan: "Free",
     },
@@ -244,7 +244,7 @@ export function AppSidebar({
   return (
     <Sidebar className="border-r-0 mt-[36px]" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <VaultSwitcher vaults={data.teams} />
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarContent>
