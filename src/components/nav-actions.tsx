@@ -109,7 +109,7 @@ export function NavActions() {
   return (
     <div className="flex items-center gap-2 text-sm">
       <ThemeToggle />
-      <Button variant="ghost" size="icon" className="h-7 w-7">
+      <Button variant="ghost" size="icon" className="navbar-button h-7 w-7">
         <Star />
       </Button>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -117,7 +117,7 @@ export function NavActions() {
           <Button
             variant="ghost"
             size="icon"
-            className="data-[state=open]:bg-accent h-7 w-7"
+            className="navbar-button data-[state=open]:bg-accent h-7 w-7"
           >
             <MoreHorizontal />
           </Button>

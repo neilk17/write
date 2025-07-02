@@ -24,19 +24,10 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap placeholder:text-muted-foreground field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
+          "tiptap field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
       },
     },
   });
-
-  useEffect(() => {
-    if (editor) {
-      if (content === "") {
-        editor.commands.setContent("");
-      }
-      editor.commands.focus();
-    }
-  }, [content, editor]);
 
   return <EditorContent editor={editor} />;
 };

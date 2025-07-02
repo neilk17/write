@@ -30,7 +30,7 @@ export default function Navbar({
   onToggleMode,
 }: CustomNavbarProps) {
   return (
-    <nav className="flex flex-row border-b">
+    <nav className="bg-sidebar navbar flex flex-row border-b">
       <div className="ml-12 flex flex-1 items-center gap-2 px-3">
         <SidebarTrigger />
         <Separator
