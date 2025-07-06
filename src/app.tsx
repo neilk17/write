@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BookOpen, FolderCog, PencilLine } from "lucide-react";
+import { BookOpen, FolderCog, PencilLine, Search, X } from "lucide-react";
 
 import { Button } from "./components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import { Input } from "./components/ui/input";
 import JournalEditor from "./components/JournalEditor";
 import JournalEntries from "./components/JournalEntries";
 import { ThemeProvider } from "./components/theme-provider";
@@ -30,6 +31,8 @@ function App() {
     "idle"
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (saveStatus === "saved") {
@@ -77,6 +80,17 @@ function App() {
     setSelectedFolder(defaultPath);
   };
 
+  const clearSearch = () => {
+    setSearchTerm("");
+    setIsSearching(false);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setIsSearching(value.length > 0);
+  };
+
   return (
     <div className="app-container relative min-h-svh">
       {selectedFolder ? (
@@ -104,12 +118,36 @@ function App() {
               )}
             </div>
             <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
+              {mode === "read" && (
+                <div className="relative flex items-center">
+                  <Search className="absolute left-2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search entries..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="pl-8 pr-8 w-48 sm:w-64 navbar-button"
+                  />
+                  {searchTerm && (
+                    <Button
+                      onClick={clearSearch}
+                      size="icon"
+                      variant="ghost"
+                      className="absolute right-1 h-6 w-6"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              )}
               <ThemeToggle />
               {mode === "write" ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      onClick={() => setMode("read")}
+                      onClick={() => {
+                        setMode("read");
+                        clearSearch();
+                      }}
                       size="icon"
                       className="navbar-button"
                     >
@@ -161,7 +199,11 @@ function App() {
                 onSaveStatusChange={setSaveStatus}
               />
             ) : (
-              <JournalEntries selectedFolder={selectedFolder} />
+              <JournalEntries 
+                selectedFolder={selectedFolder} 
+                searchTerm={searchTerm}
+                isSearching={isSearching}
+              />
             )}
           </div>
         </>

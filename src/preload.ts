@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
     saveFile: (folder: string, filename: string, content: string) => ipcRenderer.invoke('save-file', folder, filename, content),
     readFile: (folder: string, filename: string) => ipcRenderer.invoke('read-file', folder, filename),
     listEntries: (folder: string) => ipcRenderer.invoke('list-entries', folder),
+    searchFiles: (folder: string, searchTerm: string) => ipcRenderer.invoke('search-files', folder, searchTerm),
     getConfig: () => ipcRenderer.invoke('get-config'),
     updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates)
 });
