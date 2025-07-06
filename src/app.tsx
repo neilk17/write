@@ -19,7 +19,7 @@ import { createRoot } from "react-dom/client";
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [defaultPath, setDefaultPath] = useState("");
-  const [mode, setMode] = useState("write");
+  const [mode, setMode] = useState<"write" | "read">("write");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
@@ -81,25 +81,27 @@ function App() {
     <div className="app-container relative min-h-svh">
       {selectedFolder ? (
         <SidebarProvider className="flex flex-col min-h-svh">
-          {/* Top bar */}
-          <Navbar
-            currentFileName={currentFileName}
-            saveStatus={saveStatus}
-            showSavedIndicator={showSavedIndicator}
-            mode={mode}
-            onToggleMode={() =>
-              setMode((prev) => (prev === "write" ? "read" : "write"))
-            }
-          />
+          {/* Fixed Top bar */}
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <Navbar
+              currentFileName={currentFileName}
+              saveStatus={saveStatus}
+              showSavedIndicator={showSavedIndicator}
+              mode={mode}
+              onToggleMode={() =>
+                setMode((prev) => (prev === "write" ? "read" : "write"))
+              }
+            />
+          </div>
 
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 pt-12">
             <AppSidebar
               selectedFolder={selectedFolder}
               selectedEntry={currentFileName}
               onEntrySelect={handleEntrySelect}
             />
             <SidebarInset className="flex-1 overflow-auto">
-              <div className="@container px-2 sm:px-4 md:px-6">
+              <div className="@container px-2 sm:px-4 md:px-6 h-full flex flex-col">
                 {mode === "write" ? (
                   <Editor
                     selectedFolder={selectedFolder}
@@ -168,7 +170,11 @@ function App() {
   );
 }
 
-const root = createRoot(document.body);
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  throw new Error("Failed to find the root element");
+}
+const root = createRoot(rootElement);
 root.render(
   <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
     <App />
