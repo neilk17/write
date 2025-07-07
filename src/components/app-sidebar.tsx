@@ -233,12 +233,14 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   selectedFolder: string;
   selectedEntry?: string | null;
   onEntrySelect?: (name: string) => void;
+  onRefreshEntries?: (refreshFn: () => Promise<void>) => void;
 }
 
 export function AppSidebar({
   selectedFolder,
   selectedEntry,
   onEntrySelect,
+  onRefreshEntries,
   ...props
 }: AppSidebarProps) {
   return (
@@ -252,6 +254,7 @@ export function AppSidebar({
           selectedFolder={selectedFolder}
           selectedEntry={selectedEntry}
           onSelectEntry={onEntrySelect}
+          onLoadEntries={onRefreshEntries}
         />
         {/* <NavFavorites favorites={data.favorites} />
         <NavWorkspaces workspaces={data.workspaces} />

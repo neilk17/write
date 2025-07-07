@@ -15,8 +15,7 @@ if (require('electron-squirrel-startup')) {
 }
 
 const createWindow = (): void => {
-  // const isMac = process.platform === 'darwin';
-  const isMac = window.api.isMac;
+  const isMac = process.platform === 'darwin';
 
   const mainWindow = new BrowserWindow({
     height: 600,

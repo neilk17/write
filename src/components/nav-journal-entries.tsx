@@ -25,12 +25,14 @@ interface NavJournalEntriesProps {
   selectedFolder: string;
   selectedEntry?: string | null;
   onSelectEntry?: (name: string) => void;
+  onLoadEntries?: (loadFn: () => Promise<void>) => void;
 }
 
 export function NavJournalEntries({
   selectedFolder,
   selectedEntry,
   onSelectEntry,
+  onLoadEntries,
 }: NavJournalEntriesProps) {
   const [groupedEntries, setGroupedEntries] = useState<GroupedEntries>({});
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,14 @@ export function NavJournalEntries({
   useEffect(() => {
     if (selectedFolder) void loadEntries(selectedFolder);
   }, [selectedFolder]);
+
+  useEffect(() => {
+    if (onLoadEntries && selectedFolder) {
+      onLoadEntries(() => {
+        return loadEntries(selectedFolder);
+      });
+    }
+  }, [onLoadEntries, selectedFolder]);
 
   const loadEntries = async (folderPath: string) => {
     setLoading(true);

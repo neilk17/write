@@ -92,6 +92,7 @@ function JournalEditor({
       }
       await window.api.saveFile(selectedFolder, fileName, contentToSave);
       onSaveStatusChange?.("saved");
+      onFileUpdate?.(fileName);
     } catch (error) {
       console.error("Error saving journal entry:", error);
       onSaveStatusChange?.("idle");

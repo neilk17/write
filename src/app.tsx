@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 
 function App() {
@@ -25,11 +25,27 @@ function App() {
     "idle"
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const refreshEntriesRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Store the refresh function in a ref to avoid re-render cycles
+  const handleSetRefreshEntries = (fn: (() => Promise<void>) | null) => {
+    console.log("setRefreshEntries called with:", typeof fn, fn);
+    refreshEntriesRef.current = fn;
+  };
 
   // Triggered by sidebar click
   const handleEntrySelect = (name: string) => {
     setCurrentFileName(name); // remember which file
     setMode("read"); // switch UI to read mode
+  };
+
+  // Handle file saved - refresh sidebar
+  const handleFileUpdate = (fileName: string | null) => {
+    setCurrentFileName(fileName);
+    // Refresh sidebar to show new file
+    if (refreshEntriesRef.current && typeof refreshEntriesRef.current === 'function') {
+      refreshEntriesRef.current().catch(console.error);
+    }
   };
   useEffect(() => {
     if (saveStatus === "saved") {
@@ -99,13 +115,14 @@ function App() {
               selectedFolder={selectedFolder}
               selectedEntry={currentFileName}
               onEntrySelect={handleEntrySelect}
+              onRefreshEntries={handleSetRefreshEntries}
             />
             <SidebarInset className="flex-1 overflow-auto">
               <div className="@container px-2 sm:px-4 md:px-6 h-full flex flex-col">
                 {mode === "write" ? (
                   <Editor
                     selectedFolder={selectedFolder}
-                    onFileUpdate={setCurrentFileName}
+                    onFileUpdate={handleFileUpdate}
                     onSaveStatusChange={setSaveStatus}
                   />
                 ) : (
