@@ -24,19 +24,10 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap placeholder:text-muted-foreground field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
+          "tiptap field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base focus:outline-none",
       },
     },
   });
-
-  useEffect(() => {
-    if (editor) {
-      if (content === "") {
-        editor.commands.setContent("");
-      }
-      editor.commands.focus();
-    }
-  }, [content, editor]);
 
   return <EditorContent editor={editor} />;
 };
@@ -120,8 +111,10 @@ function JournalEditor({
   };
 
   return (
-    <div className="@container w-full max-w-full px-2 sm:px-4 mt-12 md:px-6 lg:max-w-4xl mx-auto space-y-4">
-      <Tiptap content={content} onUpdate={handleContentUpdate} />
+    <div className="@container w-full max-w-full px-2 sm:px-4 py-4 md:px-6 lg:max-w-3xl mx-auto space-y-4 min-h-0 flex-1">
+      <div className="h-full overflow-auto">
+        <Tiptap content={content} onUpdate={handleContentUpdate} />
+      </div>
     </div>
   );
 }

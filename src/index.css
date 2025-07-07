@@ -140,3 +140,11 @@ textarea {
 .navbar-button {
   -webkit-app-region: no-drag;
 }
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+  position: absolute;
+}

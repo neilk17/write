@@ -28,7 +28,7 @@ export default function Navbar({
 }: CustomNavbarProps) {
   const isMac = window.api.isMac;
   return (
-    <nav className={`flex flex-row border-b navbar ${isMac ? "" : "pr-28"}`}>
+    <nav className={`bg-sidebar navbar flex flex-row border-b navbar ${isMac ? "" : "pr-28"}`}>
       <div className={`${isMac ? "ml-12" : ""} flex flex-1 items-center gap-2 px-3`}>
         <SidebarTrigger />
         <Separator

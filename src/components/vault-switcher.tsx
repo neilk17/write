@@ -16,18 +16,18 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export function TeamSwitcher({
-  teams,
+export function VaultSwitcher({
+  vaults,
 }: {
-  teams: {
+  vaults: {
     name: string;
     logo: React.ElementType;
     plan: string;
   }[];
 }) {
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const [activeVault, setActiveVault] = React.useState(vaults[0]);
 
-  if (!activeTeam) {
+  if (!activeVault) {
     return null;
   }
 
@@ -38,9 +38,9 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton className="w-fit px-1.5">
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-5 items-center justify-center rounded-md">
-                <activeTeam.logo className="size-3" />
+                <activeVault.logo className="size-3" />
               </div>
-              <span className="truncate font-medium">{activeTeam.name}</span>
+              <span className="truncate font-medium">{activeVault.name}</span>
               <ChevronDown className="opacity-50" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -51,18 +51,18 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Vaults
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {vaults.map((vault, index) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={vault.name}
+                onClick={() => setActiveVault(vault)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-xs border">
-                  <team.logo className="size-4 shrink-0" />
+                  <vault.logo className="size-4 shrink-0" />
                 </div>
-                {team.name}
+                {vault.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
@@ -71,7 +71,7 @@ export function TeamSwitcher({
               <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                 <Plus className="size-4" />
               </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
+              <div className="text-muted-foreground font-medium">Add vault</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
