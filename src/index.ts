@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, nativeTheme  } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { getConfig, updateConfig } from './lib/config';
@@ -15,10 +15,18 @@ if (require('electron-squirrel-startup')) {
 }
 
 const createWindow = (): void => {
+  const isMac = process.platform === 'darwin';
+
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
-    titleBarStyle: 'hidden',
+    titleBarStyle: isMac ? 'default' : 'hidden',
+    titleBarOverlay: !isMac && {
+      color: '#fff',
+      symbolColor: '#37352f',
+      height: 36,
+    },
+    trafficLightPosition: { x: 12, y: 16 },
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       contextIsolation: true,
@@ -29,6 +37,8 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.webContents.openDevTools();
+
+  if (!isMac) mainWindow.setMenu(null);
 };
 
 // This method will be called when Electron has finished
@@ -133,6 +143,21 @@ app.on('ready', () => {
       console.error('Error listing entries:', error);
       return [];
     }
+  });
+
+  ipcMain.on('window-minimize', () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) win.minimize();
+  });
+
+  ipcMain.on('window-maximize', () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) win.isMaximized() ? win.unmaximize() : win.maximize();
+  });
+
+  ipcMain.on('window-close', () => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) win.close();
   });
 
   createWindow();

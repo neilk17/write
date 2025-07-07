@@ -1,36 +1,52 @@
-import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { BookOpen, FolderCog, PencilLine } from "lucide-react";
-
-import { Button } from "./components/ui/button";
+import { AppSidebar } from "@/components/app-sidebar";
+import Editor from "@/components/Editor";
+import Navbar from "@/components/Navbar";
+import Reader from "@/components/Reader";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./components/ui/card";
-import JournalEditor from "./components/JournalEditor";
-import JournalEntries from "./components/JournalEntries";
-import { ThemeProvider } from "./components/theme-provider";
-import { ThemeToggle } from "./components/ui/theme-toggle";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./components/ui/tooltip";
-import { cn } from "./lib/utils";
+} from "@/components/ui/card";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import { useEffect, useState, useRef } from "react";
+import { createRoot } from "react-dom/client";
 
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [defaultPath, setDefaultPath] = useState("");
-  const [mode, setMode] = useState("write");
+  const [mode, setMode] = useState<"write" | "read">("write");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const refreshEntriesRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Store the refresh function in a ref to avoid re-render cycles
+  const handleSetRefreshEntries = (fn: (() => Promise<void>) | null) => {
+    console.log("setRefreshEntries called with:", typeof fn, fn);
+    refreshEntriesRef.current = fn;
+  };
 
+  // Triggered by sidebar click
+  const handleEntrySelect = (name: string) => {
+    setCurrentFileName(name); // remember which file
+    setMode("read"); // switch UI to read mode
+  };
+
+  // Handle file saved - refresh sidebar
+  const handleFileUpdate = (fileName: string | null) => {
+    setCurrentFileName(fileName);
+    // Refresh sidebar to show new file
+    if (refreshEntriesRef.current && typeof refreshEntriesRef.current === 'function') {
+      refreshEntriesRef.current().catch(console.error);
+    }
+  };
   useEffect(() => {
     if (saveStatus === "saved") {
       setShowSavedIndicator(true);
@@ -80,91 +96,45 @@ function App() {
   return (
     <div className="app-container relative min-h-svh">
       {selectedFolder ? (
-        <>
-          <div className="@container navbar flex flex-col sm:flex-row justify-between items-center py-2 sm:p-4 md:p-6 gap-2 sm:gap-4">
-            <div className="flex items-center gap-4">
-              {mode === "write" && currentFileName && (
-                <div className="text-sm text-muted-foreground">
-                  {currentFileName}
-                </div>
-              )}
-              {mode === "write" && (
-                <div className="text-sm text-muted-foreground">
-                  {saveStatus === "saving" && "Saving..."}
-                  {saveStatus === "saved" && (
-                    <span
-                      className={`transition-opacity duration-1000 ease-out ${
-                        showSavedIndicator ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
-                      ✓ Saved
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2 @sm:gap-3 @md:gap-4 ml-auto">
-              <ThemeToggle />
-              {mode === "write" ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setMode("read")}
-                      size="icon"
-                      className="navbar-button"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Read</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setMode("write")}
-                      size="icon"
-                      className="navbar-button"
-                    >
-                      <PencilLine className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Write</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={handleFolderSelect}
-                    size="icon"
-                    className="navbar-button"
-                  >
-                    <FolderCog className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Change folder</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+        <SidebarProvider className="flex flex-col min-h-svh">
+          {/* Fixed Top bar */}
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <Navbar
+              currentFileName={currentFileName}
+              saveStatus={saveStatus}
+              showSavedIndicator={showSavedIndicator}
+              mode={mode}
+              onToggleMode={() =>
+                setMode((prev) => (prev === "write" ? "read" : "write"))
+              }
+            />
           </div>
-          <div className="@container px-2 sm:px-4 md:px-6">
-            {mode === "write" ? (
-              <JournalEditor
-                selectedFolder={selectedFolder}
-                onFileUpdate={setCurrentFileName}
-                onSaveStatusChange={setSaveStatus}
-              />
-            ) : (
-              <JournalEntries selectedFolder={selectedFolder} />
-            )}
+
+          <div className="flex flex-1 min-h-0 pt-12">
+            <AppSidebar
+              selectedFolder={selectedFolder}
+              selectedEntry={currentFileName}
+              onEntrySelect={handleEntrySelect}
+              onRefreshEntries={handleSetRefreshEntries}
+            />
+            <SidebarInset className="flex-1 overflow-auto">
+              <div className="@container px-2 sm:px-4 md:px-6 h-full flex flex-col">
+                {mode === "write" ? (
+                  <Editor
+                    selectedFolder={selectedFolder}
+                    onFileUpdate={handleFileUpdate}
+                    onSaveStatusChange={setSaveStatus}
+                  />
+                ) : (
+                  <Reader
+                    selectedFolder={selectedFolder}
+                    initialEntry={currentFileName}
+                  />
+                )}
+              </div>
+            </SidebarInset>
           </div>
-        </>
+        </SidebarProvider>
       ) : (
         <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
           <div className={cn("flex flex-col gap-6")}>
@@ -217,7 +187,11 @@ function App() {
   );
 }
 
-const root = createRoot(document.body);
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  throw new Error("Failed to find the root element");
+}
+const root = createRoot(rootElement);
 root.render(
   <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
     <App />

@@ -52,10 +52,6 @@ interface FileEntry {
   replies?: FileEntry[];
 }
 
-interface GroupedEntries {
-  [date: string]: FileEntry[];
-}
-
 interface ReplyItemProps {
   reply: FileEntry;
   currentPath: string;
@@ -90,7 +86,7 @@ function ReplyItem({ reply, currentPath, formatDateTime }: ReplyItemProps) {
   }
 
   return (
-    <div className="p-4 bg-muted rounded-lg">
+    <div className="p-4 rounded-lg">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs text-muted-foreground">
           {formatDateTime(reply.createdAt, "full")}
@@ -101,9 +97,13 @@ function ReplyItem({ reply, currentPath, formatDateTime }: ReplyItemProps) {
   );
 }
 
-function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
+interface JournalEntriesProps {
+  selectedFolder: string;
+  initialEntry?: string | null;
+}
+
+function JournalEntries({ selectedFolder, initialEntry }: JournalEntriesProps) {
   const [entries, setEntries] = useState<FileEntry[]>([]);
-  const [groupedEntries, setGroupedEntries] = useState<GroupedEntries>({});
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [entryContent, setEntryContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -117,6 +117,19 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
       loadEntries(selectedFolder);
     }
   }, [selectedFolder]);
+
+  useEffect(() => {
+    if (initialEntry && entries.length > 0) {
+      setSelectedEntry(initialEntry);
+      loadEntryContent(initialEntry);
+    }
+  }, [initialEntry, entries]);
+
+  useEffect(() => {
+    if (selectedEntry) {
+      loadEntryContent(selectedEntry);
+    }
+  }, [selectedEntry]);
 
   const loadEntries = async (folderPath: string) => {
     setLoading(true);
@@ -151,34 +164,11 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
 
       setEntries(sortedEntries);
 
-      // Group entries by date
-      if (sortedEntries.length > 0) {
-        const grouped = groupEntriesByDate(sortedEntries);
-        setGroupedEntries(grouped);
-      } else {
-        setGroupedEntries({});
-      }
-
       setLoading(false);
     } catch (error) {
       console.error("Error loading entries:", error);
       setLoading(false);
     }
-  };
-
-  const groupEntriesByDate = (entries: FileEntry[]): GroupedEntries => {
-    const grouped: GroupedEntries = {};
-
-    entries.forEach((entry) => {
-      // Group by creation date
-      const dateStr = formatDateTime(entry.createdAt, "date-only");
-      if (!grouped[dateStr]) {
-        grouped[dateStr] = [];
-      }
-      grouped[dateStr].push(entry);
-    });
-
-    return grouped;
   };
 
   const loadEntryContent = async (filename: string) => {
@@ -291,56 +281,10 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
         <p>Loading entries...</p>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-1/3 pr-4 border-r overflow-y-auto max-h-[calc(100vh-120px)]">
-            {Object.keys(groupedEntries).length === 0 ? (
-              <p>No entries found</p>
-            ) : (
-              <div className="space-y-4">
-                {Object.keys(groupedEntries)
-                  .filter((key) => key !== "directories")
-                  .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-                  .map((dateKey) => (
-                    <div key={dateKey} className="mb-4">
-                      <h3 className="font-medium text-primary mb-2">
-                        {dateKey}
-                      </h3>
-                      <ul className="space-y-1 pl-2">
-                        {groupedEntries[dateKey].map((entry) => (
-                          <div key={entry.name}>
-                            <li
-                              className={`p-1 rounded cursor-pointer hover:bg-sidebar-accent ${
-                                selectedEntry === entry.name
-                                  ? "bg-sidebar-accent"
-                                  : ""
-                              }`}
-                              onClick={() => loadEntryContent(entry.name)}
-                            >
-                              <div className="text-sm flex items-center justify-between">
-                                <span>
-                                  {formatDateTime(entry.createdAt, "time-only")}
-                                </span>
-                                {entry.replies && entry.replies.length > 0 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    +{entry.replies.length}
-                                  </span>
-                                )}
-                              </div>
-                            </li>
-                          </div>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-
-          <div className="w-2/3 pl-4 overflow-y-auto max-h-[calc(100vh-120px)]">
+          <div className="pl-4 w-full overflow-y-auto max-h-[calc(100vh-120px)]">
+            <div className="max-w-3xl mx-auto px-6">
             {selectedEntry ? (
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold">{selectedEntry}</h3>
-                </div>
                 {(() => {
                   const currentEntry = entries.find(
                     (e) => e.name === selectedEntry
@@ -348,16 +292,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
 
                   return (
                     <div className="space-y-4">
-                      {/* Main Entry */}
-                      <div className="p-4 bg-muted rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs text-muted-foreground">
-                            {formatDateTime(
-                              currentEntry?.createdAt || "",
-                              "full"
-                            )}
-                          </span>
-                        </div>
+                      <div className="p-4 rounded-lg">
                         <div className="whitespace-pre-wrap">
                           {entryContent}
                         </div>
@@ -365,7 +300,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
 
                       {currentEntry?.replies &&
                         currentEntry.replies.length > 0 && (
-                          <div className="space-y-3">
+                          <div className="border-t space-y-3">
                             {currentEntry.replies
                               .sort(
                                 (a, b) =>
@@ -384,14 +319,14 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
                         )}
 
                       {!isWritingReply && (
-                        <div className="mt-6 pt-4 border-t">
+                        <div>
                           <Button
                             onClick={handleReply}
                             size="sm"
                             variant="ghost"
+                            className="text-muted-foreground"
                           >
-                            <Plus className="h-4 w-4 " />
-                            Reply
+                            Add a comment...
                           </Button>
                         </div>
                       )}
@@ -423,6 +358,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
             ) : (
               <p className="text-gray-500">Select a file to view its content</p>
             )}
+            </div>
           </div>
         </div>
       )}
@@ -430,4 +366,6 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
   );
 }
 
-export default JournalEntries;
+export default function Reader({ selectedFolder, initialEntry }: JournalEntriesProps) {
+  return <JournalEntries selectedFolder={selectedFolder} initialEntry={initialEntry} />;
+}
