@@ -12,7 +12,8 @@ contextBridge.exposeInMainWorld('api', {
     readFile: (folder: string, filename: string) => ipcRenderer.invoke('read-file', folder, filename),
     listEntries: (folder: string) => ipcRenderer.invoke('list-entries', folder),
     getConfig: () => ipcRenderer.invoke('get-config'),
-    updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates)
+    updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates),
+    isMac: process.platform === 'darwin'
 });
 
 window.addEventListener('DOMContentLoaded', () => {

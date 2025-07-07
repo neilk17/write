@@ -18,10 +18,7 @@ interface CustomNavbarProps {
   onToggleMode: () => void;
 }
 
-/**
- * A fixed, VSCode-style top navigation bar that stays on top of
- * everything.  Designed to be lightweight and easily reusable.
- */
+
 export default function Navbar({
   currentFileName,
   saveStatus,
@@ -29,9 +26,10 @@ export default function Navbar({
   mode,
   onToggleMode,
 }: CustomNavbarProps) {
+  const isMac = window.api.isMac;
   return (
-    <nav className="flex flex-row border-b">
-      <div className="ml-12 flex flex-1 items-center gap-2 px-3">
+    <nav className={`flex flex-row border-b navbar ${isMac ? "" : "pr-28"}`}>
+      <div className={`${isMac ? "ml-12" : ""} flex flex-1 items-center gap-2 px-3`}>
         <SidebarTrigger />
         <Separator
           orientation="vertical"

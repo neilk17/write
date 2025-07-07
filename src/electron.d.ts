@@ -6,6 +6,7 @@ interface ElectronAPI {
     readFile: (folder: string, filename: string) => Promise<string>;
     listEntries: (folder: string) => Promise<FileEntry[]>;
     updateConfig: (updates: Config) => Promise<boolean>;
+    isMac: boolean;
 }
 
 interface FileEntry {
@@ -23,4 +24,5 @@ declare global {
     }
 }
 
-export { };
+export {};
+
