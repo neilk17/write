@@ -19,6 +19,7 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 12, y: 12 },
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       contextIsolation: true,

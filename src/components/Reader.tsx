@@ -90,7 +90,7 @@ function ReplyItem({ reply, currentPath, formatDateTime }: ReplyItemProps) {
   }
 
   return (
-    <div className="p-4 bg-muted rounded-lg">
+    <div className="p-4 rounded-lg">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs text-muted-foreground">
           {formatDateTime(reply.createdAt, "full")}
@@ -101,7 +101,12 @@ function ReplyItem({ reply, currentPath, formatDateTime }: ReplyItemProps) {
   );
 }
 
-function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
+interface JournalEntriesProps {
+  selectedFolder: string;
+  initialEntry?: string | null;
+}
+
+function JournalEntries({ selectedFolder, initialEntry }: JournalEntriesProps) {
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [groupedEntries, setGroupedEntries] = useState<GroupedEntries>({});
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
@@ -117,6 +122,19 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
       loadEntries(selectedFolder);
     }
   }, [selectedFolder]);
+
+  useEffect(() => {
+    if (initialEntry) {
+      setSelectedEntry(initialEntry);
+      loadEntryContent(initialEntry);
+    }
+  }, [initialEntry]);
+
+  useEffect(() => {
+    if (selectedEntry) {
+      loadEntryContent(selectedEntry);
+    }
+  }, [selectedEntry]);
 
   const loadEntries = async (folderPath: string) => {
     setLoading(true);
@@ -291,56 +309,12 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
         <p>Loading entries...</p>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-1/3 pr-4 border-r overflow-y-auto max-h-[calc(100vh-120px)]">
-            {Object.keys(groupedEntries).length === 0 ? (
-              <p>No entries found</p>
-            ) : (
-              <div className="space-y-4">
-                {Object.keys(groupedEntries)
-                  .filter((key) => key !== "directories")
-                  .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-                  .map((dateKey) => (
-                    <div key={dateKey} className="mb-4">
-                      <h3 className="font-medium text-primary mb-2">
-                        {dateKey}
-                      </h3>
-                      <ul className="space-y-1 pl-2">
-                        {groupedEntries[dateKey].map((entry) => (
-                          <div key={entry.name}>
-                            <li
-                              className={`p-1 rounded cursor-pointer hover:bg-sidebar-accent ${
-                                selectedEntry === entry.name
-                                  ? "bg-sidebar-accent"
-                                  : ""
-                              }`}
-                              onClick={() => loadEntryContent(entry.name)}
-                            >
-                              <div className="text-sm flex items-center justify-between">
-                                <span>
-                                  {formatDateTime(entry.createdAt, "time-only")}
-                                </span>
-                                {entry.replies && entry.replies.length > 0 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    +{entry.replies.length}
-                                  </span>
-                                )}
-                              </div>
-                            </li>
-                          </div>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-
-          <div className="w-2/3 pl-4 overflow-y-auto max-h-[calc(100vh-120px)]">
+          <div className="pl-4 w-full overflow-y-auto max-h-[calc(100vh-120px)]">
             {selectedEntry ? (
               <div>
-                <div className="flex justify-between items-center mb-4">
+                {/* <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold">{selectedEntry}</h3>
-                </div>
+                </div> */}
                 {(() => {
                   const currentEntry = entries.find(
                     (e) => e.name === selectedEntry
@@ -348,8 +322,7 @@ function JournalEntries({ selectedFolder }: { selectedFolder: string }) {
 
                   return (
                     <div className="space-y-4">
-                      {/* Main Entry */}
-                      <div className="p-4 bg-muted rounded-lg">
+                      <div className="p-4 rounded-lg">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-xs text-muted-foreground">
                             {formatDateTime(
