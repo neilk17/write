@@ -217,10 +217,24 @@ function JournalEntries({ selectedFolder, initialEntry }: JournalEntriesProps) {
         }
       }
 
+      // If entry is found in the entries list, use it
       if (entry && parentEntry) {
         const content = await window.api.readFile(currentPath, filename);
         setEntryContent(content);
         setSelectedEntry(parentEntry.name); // Always set to parent for UI consistency
+      } else {
+        // If entry not found in current entries list, try to load it directly
+        // This handles the case where search results include entries not yet loaded
+        try {
+          const content = await window.api.readFile(currentPath, filename);
+          setEntryContent(content);
+          setSelectedEntry(filename); // Set to the actual filename since we don't have parent info
+        } catch (fileError) {
+          console.error("Error loading file directly:", fileError);
+          // If file doesn't exist, clear the content
+          setEntryContent("");
+          setSelectedEntry(null);
+        }
       }
     } catch (error) {
       console.error("Error loading entry content:", error);
