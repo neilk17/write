@@ -19,12 +19,13 @@ import { createRoot } from "react-dom/client";
 function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [defaultPath, setDefaultPath] = useState("");
-  const [mode, setMode] = useState("write");
+  const [mode, setMode] = useState<"write" | "read">("write");
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
 
   // Triggered by sidebar click
   const handleEntrySelect = (name: string) => {
@@ -56,6 +57,20 @@ function App() {
     };
     loadDefaultPath();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        if (selectedFolder) {
+          setSearchDialogOpen(true);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedFolder]);
 
   const handleFolderSelect = async () => {
     try {
@@ -97,6 +112,8 @@ function App() {
               selectedFolder={selectedFolder}
               selectedEntry={currentFileName}
               onEntrySelect={handleEntrySelect}
+              searchDialogOpen={searchDialogOpen}
+              onSearchDialogOpenChange={setSearchDialogOpen}
             />
             <SidebarInset className="flex-1 overflow-auto">
               <div className="@container px-2 sm:px-4 md:px-6">

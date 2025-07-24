@@ -10,6 +10,7 @@ import {
 
 export function NavMain({
   items,
+  onItemClick,
 }: {
   items: {
     title: string;
@@ -17,16 +18,28 @@ export function NavMain({
     icon: LucideIcon;
     isActive?: boolean;
   }[];
+  onItemClick?: (title: string) => void;
 }) {
   return (
     <SidebarMenu>
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton asChild isActive={item.isActive}>
-            <a href={item.url}>
-              <item.icon />
-              <span>{item.title}</span>
-            </a>
+          <SidebarMenuButton
+            asChild={!onItemClick || item.url !== "#"}
+            isActive={item.isActive}
+            onClick={() => onItemClick?.(item.title)}
+          >
+            {!onItemClick || item.url !== "#" ? (
+              <a href={item.url}>
+                <item.icon className="w-4 h-4" />
+                <span>{item.title}</span>
+              </a>
+            ) : (
+              <div className="flex items-center gap-2">
+                <item.icon className="w-4 h-4" />
+                <span>{item.title}</span>
+              </div>
+            )}
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}

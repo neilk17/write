@@ -10,6 +10,7 @@ import * as React from "react";
 
 import { NavJournalEntries } from "@/components/nav-journal-entries";
 import { NavMain } from "@/components/nav-main";
+import { SearchDialog } from "@/components/search-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -233,32 +234,50 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   selectedFolder: string;
   selectedEntry?: string | null;
   onEntrySelect?: (name: string) => void;
+  searchDialogOpen?: boolean;
+  onSearchDialogOpenChange?: (open: boolean) => void;
 }
 
 export function AppSidebar({
   selectedFolder,
   selectedEntry,
   onEntrySelect,
+  searchDialogOpen = false,
+  onSearchDialogOpenChange = () => {},
   ...props
 }: AppSidebarProps) {
+  const handleNavItemClick = (title: string) => {
+    if (title === "Search") {
+      onSearchDialogOpenChange(true);
+    }
+  };
+
   return (
-    <Sidebar className="border-r-0 mt-[36px]" {...props}>
-      <SidebarHeader>
-        <VaultSwitcher vaults={data.teams} />
-        <NavMain items={data.navMain} />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavJournalEntries
-          selectedFolder={selectedFolder}
-          selectedEntry={selectedEntry}
-          onSelectEntry={onEntrySelect}
-        />
-        {/* <NavFavorites favorites={data.favorites} />
-        <NavWorkspaces workspaces={data.workspaces} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-      </SidebarContent>
-      <SidebarFooter></SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+    <>
+      <Sidebar className="border-r-0 mt-[36px]" {...props}>
+        <SidebarHeader>
+          <VaultSwitcher vaults={data.teams} />
+          <NavMain items={data.navMain} onItemClick={handleNavItemClick} />
+        </SidebarHeader>
+        <SidebarContent>
+          <NavJournalEntries
+            selectedFolder={selectedFolder}
+            selectedEntry={selectedEntry}
+            onSelectEntry={onEntrySelect}
+          />
+          {/* <NavFavorites favorites={data.favorites} />
+          <NavWorkspaces workspaces={data.workspaces} />
+          <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        </SidebarContent>
+        <SidebarFooter></SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <SearchDialog
+        open={searchDialogOpen}
+        onOpenChange={onSearchDialogOpenChange}
+        selectedFolder={selectedFolder}
+        onSelectEntry={onEntrySelect}
+      />
+    </>
   );
 }
