@@ -1,26 +1,15 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { Placeholder } from "@tiptap/extension-placeholder";
-import { useEffect, useRef, useState } from "react";
-import getFormattedTimestamp from "../lib/dates";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TiptapProps {
   content: string;
-  onUpdate: (content: string) => void;
 }
 
-const Tiptap = ({ content, onUpdate }: TiptapProps) => {
+const Tiptap = ({ content }: TiptapProps) => {
   const editor = useEditor({
     content,
-    onUpdate: ({ editor }) => {
-      onUpdate(editor.getText());
-    },
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: "Write…",
-      }),
-    ],
+    extensions: [StarterKit],
     editorProps: {
       attributes: {
         class:
@@ -32,20 +21,11 @@ const Tiptap = ({ content, onUpdate }: TiptapProps) => {
   return <EditorContent editor={editor} />;
 };
 
-function JournalEditor({
-  selectedFolder,
-  onFileUpdate,
-  onSaveStatusChange,
-}: {
-  selectedFolder: string;
-  onFileUpdate?: (fileName: string | null) => void;
-  onSaveStatusChange?: (status: "idle" | "saving" | "saved") => void;
-}) {
+function JournalEditor() {
   const [content, setContent] = useState("");
-  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
-  const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
   const contentRef = useRef(content);
-  const currentFileNameRef = useRef(currentFileName);
+  const currentFilePathRef = useRef(currentFilePath);
 
   // Keep refs updated
   useEffect(() => {
@@ -53,66 +33,66 @@ function JournalEditor({
   }, [content]);
 
   useEffect(() => {
-    currentFileNameRef.current = currentFileName;
-  }, [currentFileName]);
+    currentFilePathRef.current = currentFilePath;
+  }, [currentFilePath]);
 
-  // Save pending content when component unmounts
+  const handleSave = useCallback(async () => {
+    const text = contentRef.current;
+    const existingPath = currentFilePathRef.current;
+    if (!text || text.trim().length === 0) {
+      return;
+    }
+    if (!existingPath) {
+      const result = await window.api.saveWithDialog(text);
+      if (result.success && result.filePath) {
+        setCurrentFilePath(result.filePath);
+      }
+      return;
+    }
+    const res = await window.api.saveToPath(existingPath, text);
+    if (!res.success) {
+      // If direct save failed, try save as
+      const result = await window.api.saveWithDialog(text, existingPath);
+      if (result.success && result.filePath) {
+        setCurrentFilePath(result.filePath);
+      }
+    }
+  }, []);
+
+  const handleSaveAs = useCallback(async () => {
+    const text = contentRef.current;
+    if (!text || text.trim().length === 0) {
+      return;
+    }
+    const result = await window.api.saveWithDialog(
+      text,
+      currentFilePathRef.current ?? undefined
+    );
+    if (result.success && result.filePath) {
+      setCurrentFilePath(result.filePath);
+    }
+  }, []);
+
   useEffect(() => {
-    return () => {
-      if (autosaveTimeoutRef.current) {
-        clearTimeout(autosaveTimeoutRef.current);
-        // Save immediately if there's unsaved content
-        if (contentRef.current.trim()) {
-          const contentToSave = contentRef.current;
-          let fileName = currentFileNameRef.current;
-          if (!fileName) {
-            fileName = `${getFormattedTimestamp()}.txt`;
-          }
-          // Fire and forget - can't await in cleanup
-          window.api.saveFile(selectedFolder, fileName, contentToSave);
+    const onKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const cmd = isMac ? e.metaKey : e.ctrlKey;
+      if (cmd && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleSaveAs();
+        } else {
+          handleSave();
         }
       }
     };
-  }, [selectedFolder]); // Only selectedFolder in deps since it's from props
-
-  const handleSave = async (newContent?: string) => {
-    const contentToSave = newContent || content;
-    if (!contentToSave.trim()) {
-      return;
-    }
-
-    onSaveStatusChange?.("saving");
-
-    try {
-      let fileName = currentFileName;
-      if (!fileName) {
-        fileName = `${getFormattedTimestamp()}.txt`;
-        setCurrentFileName(fileName);
-        onFileUpdate?.(fileName);
-      }
-      await window.api.saveFile(selectedFolder, fileName, contentToSave);
-      onSaveStatusChange?.("saved");
-    } catch (error) {
-      console.error("Error saving journal entry:", error);
-      onSaveStatusChange?.("idle");
-    }
-  };
-
-  const handleContentUpdate = (newContent: string) => {
-    setContent(newContent);
-    clearTimeout(autosaveTimeoutRef.current);
-    onSaveStatusChange?.("idle");
-
-    if (newContent.trim()) {
-      autosaveTimeoutRef.current = setTimeout(() => {
-        handleSave(newContent);
-      }, 2000);
-    }
-  };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleSave, handleSaveAs]);
 
   return (
     <div className="@container w-full max-w-full px-2 sm:px-4 mt-12 md:px-6 lg:max-w-4xl mx-auto space-y-4">
-      <Tiptap content={content} onUpdate={handleContentUpdate} />
+      <Tiptap content={content} />
     </div>
   );
 }
