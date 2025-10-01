@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { BookOpen, PencilLine } from "lucide-react";
-import { NavActions } from "./nav-actions";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -70,7 +69,6 @@ export default function Navbar({
           <PencilLine className="h-4 w-4" />
         )}
       </Button>
-      <NavActions />
     </nav>
   );
 }
