@@ -94,3 +94,35 @@ ipcMain.handle('save-to-path', async (_event, filePath: string, content: string)
     return { success: false as const };
   }
 });
+
+ipcMain.handle('open-with-dialog', async () => {
+  const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
+  const result = await dialog.showOpenDialog(window, {
+    title: 'Open File',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Text', extensions: ['txt', 'md'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  });
+  if (result.canceled || result.filePaths.length === 0) {
+    return { success: false as const, filePath: null as string | null, content: '' };
+  }
+  const filePath = result.filePaths[0];
+  const content = await fs.promises.readFile(filePath, 'utf8');
+  return { success: true as const, filePath, content };
+});
+
+ipcMain.handle('read-from-path', async (_event, filePath: string) => {
+  const content = await fs.promises.readFile(filePath, 'utf8');
+  return { success: true as const, content };
+});
+
+ipcMain.handle('stat-path', async (_event, filePath: string) => {
+  try {
+    const stats = await fs.promises.stat(filePath);
+    return { success: true as const, createdAtMs: stats.birthtimeMs };
+  } catch (error) {
+    return { success: false as const, createdAtMs: null as number | null };
+  }
+});

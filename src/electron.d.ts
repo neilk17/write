@@ -7,6 +7,9 @@ interface ElectronAPI {
     updateConfig: (updates: Config) => Promise<boolean>;
     saveWithDialog: (content: string, defaultPath?: string) => Promise<{ success: boolean; filePath: string | null }>;
     saveToPath: (filePath: string, content: string) => Promise<{ success: boolean }>;
+    openWithDialog: () => Promise<{ success: boolean; filePath: string | null; content: string }>;
+    readFromPath: (filePath: string) => Promise<{ success: boolean; content: string }>;
+    statPath: (filePath: string) => Promise<{ success: boolean; createdAtMs: number | null }>;
 }
 
 interface FileEntry {
