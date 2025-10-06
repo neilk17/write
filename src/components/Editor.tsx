@@ -30,7 +30,7 @@ const Tiptap = ({ content, onChange }: TiptapProps) => {
     },
     onUpdate: ({ editor }) => {
       // Preserve line breaks: TipTap paragraphs become newlines
-      onChange(editor.getText({ blockSeparator: '\n' }));
+      onChange(editor.getText({ blockSeparator: "\n" }));
     },
   });
 
@@ -49,7 +49,7 @@ const Tiptap = ({ content, onChange }: TiptapProps) => {
               .replace(/>/g, "&gt;")}</p>`
       )
       .join("");
-    const current = editor.getText({ blockSeparator: '\n' });
+    const current = editor.getText({ blockSeparator: "\n" });
     if (current !== content) {
       editor.commands.setContent(html, false);
     }
@@ -245,7 +245,7 @@ function JournalEditor() {
   }, []);
 
   return (
-    <div className="@container w-full max-w-full px-2 sm:px-4 mt-12 md:px-6 lg:max-w-4xl mx-auto space-y-4">
+    <div className="@container w-full max-w-full px-2 sm:px-4 mt-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
       <Tiptap content={content} onChange={setContent} />
       {saveMessage && (
         <div className="text-sm text-muted-foreground select-none">

@@ -99,7 +99,7 @@ export function AppSidebar() {
       <Sidebar className="border-r-0">
         <SidebarContent>
           <div className="px-2 py-1 "></div>
-          <div className="px-2 space-y-1 mt-12">
+          <div className="px-2 space-y-1">
             {recentFiles.length === 0 ? (
               <div className="px-2 py-1 text-xs opacity-50">
                 No recent files
