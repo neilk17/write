@@ -1,6 +1,15 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface TiptapProps {
   content: string;
@@ -25,13 +34,14 @@ const Tiptap = ({ content, onChange }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap field-sizing-content min-h-16 w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
+          "tiptap field-sizing-content min-h-screen w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
       },
     },
     onUpdate: ({ editor }) => {
       // Preserve line breaks: TipTap paragraphs become newlines
       onChange(editor.getText({ blockSeparator: "\n" }));
     },
+    autofocus: 'end',
   });
 
   // Keep editor content in sync when parent content prop changes (e.g., opening a file)
@@ -62,9 +72,11 @@ function JournalEditor() {
   const [content, setContent] = useState("");
   const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [showNewFileDialog, setShowNewFileDialog] = useState(false);
   const hideSaveMsgTimeoutRef = useRef<number | null>(null);
   const contentRef = useRef(content);
   const currentFilePathRef = useRef(currentFilePath);
+  const lastSavedContentRef = useRef("");
 
   // Keep refs updated
   useEffect(() => {
@@ -134,6 +146,7 @@ function JournalEditor() {
       const result = await window.api.saveWithDialog(text);
       if (result.success && result.filePath) {
         setCurrentFilePath(result.filePath);
+        lastSavedContentRef.current = text;
         // Append new file to end of list without reordering existing entries
         try {
           const raw = localStorage.getItem("recentFiles");
@@ -170,10 +183,12 @@ function JournalEditor() {
       const result = await window.api.saveWithDialog(text, existingPath);
       if (result.success && result.filePath) {
         setCurrentFilePath(result.filePath);
+        lastSavedContentRef.current = text;
         updateRecentFiles(result.filePath);
         showSavedMessage(result.filePath);
       }
     } else {
+      lastSavedContentRef.current = text;
       showSavedMessage(existingPath);
     }
   }, []);
@@ -189,9 +204,36 @@ function JournalEditor() {
     );
     if (result.success && result.filePath) {
       setCurrentFilePath(result.filePath);
+      lastSavedContentRef.current = text;
       updateRecentFiles(result.filePath);
       showSavedMessage(result.filePath);
     }
+  }, []);
+
+  const handleNewFile = useCallback(() => {
+    const hasUnsavedChanges = contentRef.current !== lastSavedContentRef.current;
+    if (hasUnsavedChanges) {
+      setShowNewFileDialog(true);
+    } else {
+      setContent("");
+      setCurrentFilePath(null);
+      lastSavedContentRef.current = "";
+    }
+  }, []);
+
+  const handleNewFileSave = useCallback(async () => {
+    await handleSave();
+    setContent("");
+    setCurrentFilePath(null);
+    lastSavedContentRef.current = "";
+    setShowNewFileDialog(false);
+  }, [handleSave]);
+
+  const handleNewFileDiscard = useCallback(() => {
+    setContent("");
+    setCurrentFilePath(null);
+    lastSavedContentRef.current = "";
+    setShowNewFileDialog(false);
   }, []);
 
   useEffect(() => {
@@ -220,10 +262,14 @@ function JournalEditor() {
           }
         });
       }
+      if (cmd && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        handleNewFile();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleSave, handleSaveAs]);
+  }, [handleSave, handleSaveAs, handleNewFile]);
 
   // Listen for open-file events from the sidebar
   useEffect(() => {
@@ -232,6 +278,7 @@ function JournalEditor() {
         .detail;
       setCurrentFilePath(detail.filePath);
       setContent(detail.content);
+      lastSavedContentRef.current = detail.content;
     };
     window.addEventListener(
       "open-file" as unknown as keyof WindowEventMap,
@@ -245,14 +292,40 @@ function JournalEditor() {
   }, []);
 
   return (
-    <div className="@container w-full max-w-full px-2 sm:px-4 mt-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
-      <Tiptap content={content} onChange={setContent} />
-      {saveMessage && (
-        <div className="text-sm text-muted-foreground select-none">
-          {saveMessage}
-        </div>
-      )}
-    </div>
+    <>
+      <div className="@container w-full max-w-full px-2 sm:px-4 mt-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
+        <Tiptap content={content} onChange={setContent} />
+        {saveMessage && (
+          <div className="text-sm text-muted-foreground select-none">
+            {saveMessage}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={showNewFileDialog} onOpenChange={setShowNewFileDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save current file?</DialogTitle>
+            <DialogDescription>
+              You have unsaved changes. Do you want to save them before creating
+              a new file?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewFileDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="outline" onClick={handleNewFileDiscard}>
+              Don't Save
+            </Button>
+            <Button onClick={handleNewFileSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
