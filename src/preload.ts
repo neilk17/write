@@ -12,7 +12,13 @@ contextBridge.exposeInMainWorld('api', {
     readFile: (folder: string, filename: string) => ipcRenderer.invoke('read-file', folder, filename),
     listEntries: (folder: string) => ipcRenderer.invoke('list-entries', folder),
     getConfig: () => ipcRenderer.invoke('get-config'),
-    updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates)
+    updateConfig: (updates: Config) => ipcRenderer.invoke('update-config', updates),
+    // New simplified save API for this app's current needs
+    saveWithDialog: (content: string, defaultPath?: string) => ipcRenderer.invoke('save-with-dialog', content, defaultPath),
+    saveToPath: (filePath: string, content: string) => ipcRenderer.invoke('save-to-path', filePath, content),
+    openWithDialog: () => ipcRenderer.invoke('open-with-dialog'),
+    readFromPath: (filePath: string) => ipcRenderer.invoke('read-from-path', filePath),
+    statPath: (filePath: string) => ipcRenderer.invoke('stat-path', filePath)
 });
 
 window.addEventListener('DOMContentLoaded', () => {

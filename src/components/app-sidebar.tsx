@@ -1,283 +1,131 @@
 import {
-  AudioWaveform,
-  BookHeart,
-  Command,
-  MessageCircleQuestion,
-  Search,
-  Settings2,
-} from "lucide-react";
-import * as React from "react";
-
-import { NavJournalEntries } from "@/components/nav-journal-entries";
-import { NavMain } from "@/components/nav-main";
-import { SearchDialog } from "@/components/search-dialog";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { VaultSwitcher } from "@/components/vault-switcher";
+import { useEffect, useState } from "react";
 
-// This is sample data.
-const data = {
-  teams: [
-    {
-      name: "Personal",
-      logo: BookHeart,
-      plan: "Enterprise",
-    },
-    {
-      name: "Work",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Search",
-      url: "#",
-      icon: Search,
-    },
-    // {
-    //   title: "Ask AI",
-    //   url: "#",
-    //   icon: Sparkles,
-    // },
-    // {
-    //   title: "Home",
-    //   url: "#",
-    //   icon: Home,
-    //   isActive: true,
-    // },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-    },
-    {
-      title: "Help",
-      url: "#",
-      icon: MessageCircleQuestion,
-    },
-  ],
-  favorites: [
-    {
-      name: "Project Management & Task Tracking",
-      url: "#",
-      emoji: "📊",
-    },
-    {
-      name: "Family Recipe Collection & Meal Planning",
-      url: "#",
-      emoji: "🍳",
-    },
-    {
-      name: "Fitness Tracker & Workout Routines",
-      url: "#",
-      emoji: "💪",
-    },
-    {
-      name: "Book Notes & Reading List",
-      url: "#",
-      emoji: "📚",
-    },
-    {
-      name: "Sustainable Gardening Tips & Plant Care",
-      url: "#",
-      emoji: "🌱",
-    },
-    {
-      name: "Language Learning Progress & Resources",
-      url: "#",
-      emoji: "🗣️",
-    },
-    {
-      name: "Home Renovation Ideas & Budget Tracker",
-      url: "#",
-      emoji: "🏠",
-    },
-    {
-      name: "Personal Finance & Investment Portfolio",
-      url: "#",
-      emoji: "💰",
-    },
-    {
-      name: "Movie & TV Show Watchlist with Reviews",
-      url: "#",
-      emoji: "🎬",
-    },
-    {
-      name: "Daily Habit Tracker & Goal Setting",
-      url: "#",
-      emoji: "✅",
-    },
-  ],
-  workspaces: [
-    {
-      name: "Personal Life Management",
-      emoji: "🏠",
-      pages: [
-        {
-          name: "Daily Journal & Reflection",
-          url: "#",
-          emoji: "📔",
-        },
-        {
-          name: "Health & Wellness Tracker",
-          url: "#",
-          emoji: "🍏",
-        },
-        {
-          name: "Personal Growth & Learning Goals",
-          url: "#",
-          emoji: "🌟",
-        },
-      ],
-    },
-    {
-      name: "Professional Development",
-      emoji: "💼",
-      pages: [
-        {
-          name: "Career Objectives & Milestones",
-          url: "#",
-          emoji: "🎯",
-        },
-        {
-          name: "Skill Acquisition & Training Log",
-          url: "#",
-          emoji: "🧠",
-        },
-        {
-          name: "Networking Contacts & Events",
-          url: "#",
-          emoji: "🤝",
-        },
-      ],
-    },
-    {
-      name: "Creative Projects",
-      emoji: "🎨",
-      pages: [
-        {
-          name: "Writing Ideas & Story Outlines",
-          url: "#",
-          emoji: "✍️",
-        },
-        {
-          name: "Art & Design Portfolio",
-          url: "#",
-          emoji: "🖼️",
-        },
-        {
-          name: "Music Composition & Practice Log",
-          url: "#",
-          emoji: "🎵",
-        },
-      ],
-    },
-    {
-      name: "Home Management",
-      emoji: "🏡",
-      pages: [
-        {
-          name: "Household Budget & Expense Tracking",
-          url: "#",
-          emoji: "💰",
-        },
-        {
-          name: "Home Maintenance Schedule & Tasks",
-          url: "#",
-          emoji: "🔧",
-        },
-        {
-          name: "Family Calendar & Event Planning",
-          url: "#",
-          emoji: "📅",
-        },
-      ],
-    },
-    {
-      name: "Travel & Adventure",
-      emoji: "🧳",
-      pages: [
-        {
-          name: "Trip Planning & Itineraries",
-          url: "#",
-          emoji: "🗺️",
-        },
-        {
-          name: "Travel Bucket List & Inspiration",
-          url: "#",
-          emoji: "🌎",
-        },
-        {
-          name: "Travel Journal & Photo Gallery",
-          url: "#",
-          emoji: "📸",
-        },
-      ],
-    },
-  ],
-};
+type RecentMeta = { path: string; createdAtMs: number } | string;
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  selectedFolder: string;
-  selectedEntry?: string | null;
-  onEntrySelect?: (name: string) => void;
-  searchDialogOpen?: boolean;
-  onSearchDialogOpenChange?: (open: boolean) => void;
-}
+export function AppSidebar() {
+  const [recentFiles, setRecentFiles] = useState<string[]>([]);
+  const [recentMeta, setRecentMeta] = useState<RecentMeta[]>([]);
 
-export function AppSidebar({
-  selectedFolder,
-  selectedEntry,
-  onEntrySelect,
-  searchDialogOpen = false,
-  onSearchDialogOpenChange = () => {},
-  ...props
-}: AppSidebarProps) {
-  const handleNavItemClick = (title: string) => {
-    if (title === "Search") {
-      onSearchDialogOpenChange(true);
+  const getBasename = (filePath: string) => {
+    const parts = filePath.split(/[/\\]/);
+    return parts[parts.length - 1] || filePath;
+  };
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("recentFiles");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const meta: RecentMeta[] = parsed as RecentMeta[];
+          setRecentMeta(meta);
+          const paths = meta.map(
+            (it: { path: string; createdAtMs: number } | string) =>
+              typeof it === "string" ? it : it.path
+          );
+          setRecentFiles(paths);
+        }
+      }
+    } catch (_) {
+      // ignore malformed localStorage content
+    }
+    const reload = () => {
+      try {
+        const raw = localStorage.getItem("recentFiles");
+        const parsed = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(parsed)) {
+          const meta: RecentMeta[] = parsed as RecentMeta[];
+          setRecentMeta(meta);
+          const paths = meta.map(
+            (it: { path: string; createdAtMs: number } | string) =>
+              typeof it === "string" ? it : it.path
+          );
+          setRecentFiles(paths);
+        }
+      } catch (_error) {
+        // ignore parse errors
+      }
+    };
+    window.addEventListener("recent-files-changed", reload);
+    return () => window.removeEventListener("recent-files-changed", reload);
+  }, []);
+
+  const openRecent = async (filePath: string) => {
+    try {
+      const res = await window.api.readFromPath(filePath);
+      if (res.success) {
+        // Keep order stable: update timestamp if present, append if new
+        const now = Date.now();
+        const asMeta =
+          recentMeta.length > 0
+            ? recentMeta.map((it) =>
+                typeof it === "string" ? { path: it, createdAtMs: 0 } : it
+              )
+            : recentFiles.map((p) => ({ path: p, createdAtMs: 0 }));
+        let found = false;
+        const updated = asMeta.map((it) => {
+          if (it.path === filePath) {
+            found = true;
+            return { ...it, createdAtMs: now };
+          }
+          return it;
+        });
+        const nextMeta = found
+          ? updated
+          : [...updated, { path: filePath, createdAtMs: now }];
+        const trimmed = nextMeta.slice(-10);
+        setRecentMeta(trimmed);
+        setRecentFiles(trimmed.map((it) => it.path));
+        localStorage.setItem("recentFiles", JSON.stringify(trimmed));
+        const event = new CustomEvent("open-file", {
+          detail: { filePath, content: res.content },
+        });
+        window.dispatchEvent(event);
+        window.dispatchEvent(new Event("recent-files-changed"));
+      }
+    } catch (_) {
+      // ignore read errors for missing/moved files
     }
   };
 
   return (
     <>
-      <Sidebar className="border-r-0 mt-[36px]" {...props}>
-        <SidebarHeader>
-          <VaultSwitcher vaults={data.teams} />
-          <NavMain items={data.navMain} onItemClick={handleNavItemClick} />
-        </SidebarHeader>
+      <Sidebar className="border-r-0">
         <SidebarContent>
-          <NavJournalEntries
-            selectedFolder={selectedFolder}
-            selectedEntry={selectedEntry}
-            onSelectEntry={onEntrySelect}
-          />
-          {/* <NavFavorites favorites={data.favorites} />
-          <NavWorkspaces workspaces={data.workspaces} />
-          <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+          <div className="px-2 py-1 "></div>
+          <div className="px-2 space-y-1">
+            {recentFiles.length === 0 ? (
+              <div className="px-2 py-1 text-xs opacity-50">
+                No recent files
+              </div>
+            ) : (
+              (recentMeta.length > 0 ? recentMeta : recentFiles).map(
+                (item: RecentMeta | string) => {
+                  const file = typeof item === "string" ? item : item.path;
+                  return (
+                    <button
+                      key={file}
+                      className="w-full text-left text-sm px-2 py-1 hover:bg-accent/30 rounded"
+                      onClick={() => openRecent(file)}
+                      title={file}
+                    >
+                      {getBasename(file)}
+                    </button>
+                  );
+                }
+              )
+            )}
+          </div>
         </SidebarContent>
         <SidebarFooter></SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SearchDialog
-        open={searchDialogOpen}
-        onOpenChange={onSearchDialogOpenChange}
-        selectedFolder={selectedFolder}
-        onSelectEntry={onEntrySelect}
-      />
     </>
   );
 }
