@@ -34,7 +34,7 @@ const Tiptap = ({ content, onChange }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "tiptap field-sizing-content min-h-screen w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
+          "tiptap field-sizing-content min-h-full w-full rounded-md bg-transparent px-3 py-2 text-base transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 text-base",
       },
     },
     onUpdate: ({ editor }) => {
@@ -293,10 +293,12 @@ function JournalEditor() {
 
   return (
     <>
-      <div className="@container w-full max-w-full px-2 sm:px-4 mt-4 md:px-6 lg:max-w-4xl mx-auto space-y-4">
-        <Tiptap content={content} onChange={setContent} />
+      <div className="@container w-full max-w-full px-2 sm:px-4 mt-4 md:px-6 lg:max-w-4xl mx-auto flex flex-col h-[calc(100vh-2rem)]">
+        <div className="flex-1 min-h-0 overflow-auto">
+          <Tiptap content={content} onChange={setContent} />
+        </div>
         {saveMessage && (
-          <div className="text-sm text-muted-foreground select-none">
+          <div className="text-sm text-muted-foreground select-none pt-4">
             {saveMessage}
           </div>
         )}
